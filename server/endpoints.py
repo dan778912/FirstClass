@@ -51,12 +51,6 @@ class Endpoints(Resource):
         return {"Available endpoints": endpoints}
 
 @api.route(TITLE_EP)
-    """
-    The purpose of the JournalTitle class is to create, delete, and access the Journal title
-    """
 class JournalTitle(Resource):
-        """
-        The `get()` method will return the Journal title
-        """
     def get(self):
         return {TITLE_RESP: TITLE}
