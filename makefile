@@ -20,7 +20,7 @@ all_tests: FORCE
 
 dev_env: FORCE
 	pip install -r $(REQ_DIR)/requirements-dev.txt
-    	@echo "You should set PYTHONPATH to: "
+    	@echo $ export PYTHONPATH=$(pwd):$PYTHONPATH
     	@echo $(shell pwd)
 
 docs: FORCE
