@@ -1,2 +1,3 @@
-#/bin/bash
-source demo-repo4-venv/bin/activate
+#!/bin/bash
+#this is for alex's virtual env activation
+source pythonenv/bin/activate
