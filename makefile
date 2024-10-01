@@ -19,9 +19,9 @@ all_tests: FORCE
 	cd $(DB_DIR); make tests
 
 dev_env: FORCE
-    pip install -r $(REQ_DIR)/requirements-dev.txt
-    @echo "You should set PYTHONPATH to: "
-    @echo $(shell pwd)
+	pip install -r $(REQ_DIR)/requirements-dev.txt
+	@echo $ export PYTHONPATH=$(pwd):$PYTHONPATH
+	@echo $(shell pwd)
 
 docs: FORCE
 	cd $(API_DIR); make docs
