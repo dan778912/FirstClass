@@ -20,7 +20,7 @@ ADD_EMAIL = "callahan@nyu.edu"
 
 
 def test_create_person():
-    people = ppl.get_people
+    people = ppl.get_people()
     assert ADD_EMAIL not in people
     ppl.create_person("Professor Callahan", "NYU", ADD_EMAIL)
     people = ppl.get_people()
