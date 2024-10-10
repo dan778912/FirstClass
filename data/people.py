@@ -23,11 +23,17 @@ TEST_PERSON_DICT = {
     },
 }
 
+
 def create_person(name: str, affiliation: str, email: str):
     if email in TEST_PERSON_DICT:
         raise ValueError(f'Trying to add duplicate: {email=}')
-    TEST_PERSON_DICT[email] = {NAME: name, AFFILIATION: affiliation, EMAIL: email}
-    return TEST_PERSON_DICT[email]  # Return the created entry
+    TEST_PERSON_DICT[email] = {
+        NAME: name,
+        AFFILIATION: affiliation,
+        EMAIL: email
+    }
+    return TEST_PERSON_DICT[email]
+
 
 def update_person(email: str, name=None, affiliation=None):
     if email not in TEST_PERSON_DICT:
@@ -38,14 +44,17 @@ def update_person(email: str, name=None, affiliation=None):
         TEST_PERSON_DICT[email][AFFILIATION] = affiliation
     return TEST_PERSON_DICT[email]
 
+
 def read_person(email: str):
     return TEST_PERSON_DICT.get(email)
+
 
 def delete_person(email: str):
     if email in TEST_PERSON_DICT:
         del TEST_PERSON_DICT[email]
         return True
     return False
+
 
 def get_people():
     return TEST_PERSON_DICT
