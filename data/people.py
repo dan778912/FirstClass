@@ -26,16 +26,19 @@ TEST_PERSON_DICT = {
 }
 
 
-def create_person():
+def create_person(name: str, affiliation: str, email: str):
     """
     Creates a new entity Person.
     Returns new Person with fields: name, affiliation, email.
     Args:
         string: name, affiliation, email_address
     Returns:
-        Person: the new Person created.
+        None
     """
-    pass
+    if email in TEST_PERSON_DICT:
+        raise ValueError(f'Trying to add duplicate: {email=}')
+    TEST_PERSON_DICT[email] = {NAME: name, AFFILIATION: affiliation, 
+                               EMAIL: email}
 
 
 def update_people():
