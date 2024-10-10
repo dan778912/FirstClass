@@ -2,6 +2,29 @@
 This module interfaces to a data layer that endpoints make use of.
 """
 
+NAME = "name"
+ROLES = "roles"
+AFFILIATION = "affiliation"
+EMAIL = "email"
+
+TEST_EMAIL = "aim9061@nyu.edu"
+PROF_TEST_EMAIL = "ejc369@nyu.edu"
+
+TEST_PERSON_DICT = {
+    TEST_EMAIL: {
+        NAME: "Alex Martin",
+        ROLES: [],
+        AFFILIATION: "NYU",
+        EMAIL: TEST_EMAIL
+    },
+    PROF_TEST_EMAIL: {
+        NAME: "Eugene Callahan",
+        ROLES: [],
+        AFFILIATION: "NYU",
+        EMAIL: PROF_TEST_EMAIL
+    },
+}
+
 
 def create_people():
     """
@@ -42,13 +65,13 @@ def read_people():
     pass
 
 
-def delete_people():
+def delete_people(_id):
     """
     Deletes given entity Person.
     Returns true if successfully deleted, and false if an error occurred.
 
     Args:
-        Person: entity to be deleted
+        Person: person id to be deleted
     Returns:
         Bool: true if deleted, false if not.
     """
@@ -65,3 +88,5 @@ def get_people():
     Returns:
         Dict: dictionary of users on user email
     """
+    people = TEST_PERSON_DICT
+    return people
