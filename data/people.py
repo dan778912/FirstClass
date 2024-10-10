@@ -26,7 +26,7 @@ TEST_PERSON_DICT = {
 }
 
 
-def create_people():
+def create_person():
     """
     Creates a new entity Person.
     Returns new Person with fields: name, affiliation, email.
