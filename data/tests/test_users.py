@@ -1,4 +1,7 @@
 import data.users as usrs
+import pytest
+
+NEW_USER_EMAIL = "newuser@nyu.edu"
 
 
 def test_get_users():
