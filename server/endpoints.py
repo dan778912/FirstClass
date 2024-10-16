@@ -9,15 +9,23 @@ from flask_restx import Resource, Api  # Namespace, fields
 from flask_cors import CORS
 
 # import werkzeug.exceptions as wz
+import data.people as ppl
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
+DATE = '2024-09-24'
+DATE_RESP = 'Date'
+EDITOR = 'ayy9673@nyu.edu'
+EDITOR_RESP = 'Editor'
 ENDPOINT_EP = '/endpoints'
 ENDPOINT_RESP = 'Available endpoints'
 HELLO_EP = '/hello'
 HELLO_RESP = 'hello'
+PEOPLE_EP = '/people'
+PUBLISHER = 'FirstClass'
+PUBLISHER_RESP = 'Publisher'
 TITLE_EP = '/title'
 TITLE_RESP = 'Title'
 TITLE = 'The Journal'
@@ -54,4 +62,14 @@ class Endpoints(Resource):
 @api.route(TITLE_EP)
 class JournalTitle(Resource):
     def get(self):
-        return {TITLE_RESP: TITLE}
+        return {
+            TITLE_RESP: TITLE,
+            EDITOR_RESP: EDITOR,
+            PUBLISHER_RESP: PUBLISHER
+        }
+
+
+@api.route(PEOPLE_EP)
+class People(Resource):
+    def get(self):
+        return ppl.get_people()
