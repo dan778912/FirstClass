@@ -2,13 +2,13 @@
 This is the file containing all of the endpoints for our flask app.
 The endpoint called `endpoints` will return all available endpoints.
 """
-# from http import HTTPStatus
+from http import HTTPStatus
 
 from flask import Flask  # , request
 from flask_restx import Resource, Api  # Namespace, fields
 from flask_cors import CORS
 
-# import werkzeug.exceptions as wz
+import werkzeug.exceptions as wz
 import data.people as ppl
 
 app = Flask(__name__)
@@ -71,5 +71,25 @@ class JournalTitle(Resource):
 
 @api.route(PEOPLE_EP)
 class People(Resource):
+    """
+    This class handles creating, getting, reading, updating
+    and deleting people.
+    """
     def get(self):
+        """
+        The `get()` method returns a dictionary of people from the journal.
+        """
         return ppl.get_people()
+
+
+@api.route(f'{PEOPLE_EP}/<_id>')
+class PersonDelete(Resource):
+
+    @api.response(HTTPStatus.OK, 'Success.')
+    @api.response(HTTPStatus.NOT_FOUND, 'No such person.')
+    def delete(self, _id):
+        ret = ppl.delete_person(_id)
+        if ret is not None:
+            return {'Deleted': ret}
+        else:
+            raise wz.NotFound(f'No such person: {_id}')

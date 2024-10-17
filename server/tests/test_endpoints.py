@@ -23,11 +23,13 @@ def test_hello():
     resp_json = resp.get_json()
     assert ep.HELLO_RESP in resp_json
 
+
 def test_title():
     resp = TEST_CLIENT.get(ep.TITLE_EP)
     resp_json = resp.get_json()
     assert ep.TITLE_RESP in resp_json
     assert isinstance(resp_json[ep.TITLE_RESP],str)
+
 
 def test_get_people():
     resp = TEST_CLIENT.get(ep.PEOPLE_EP)
@@ -36,3 +38,7 @@ def test_get_people():
         assert isinstance(_id, str)
         assert len(_id) > 0
         assert NAME in person
+
+
+def test_del_people():
+    pass

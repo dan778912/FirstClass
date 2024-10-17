@@ -25,6 +25,14 @@ TEST_PERSON_DICT = {
 
 
 def create_person(name: str, affiliation: str, email: str):
+    """
+    Creates a new entity Person.
+    Returns new Person with fields: name, affiliation, email.
+    Args:
+        string: name, affiliation, email
+    Returns:
+        string: email value in dictionary
+    """
     if email in TEST_PERSON_DICT:
         raise ValueError(f'Trying to add duplicate: {email=}')
     TEST_PERSON_DICT[email] = {
@@ -36,6 +44,17 @@ def create_person(name: str, affiliation: str, email: str):
 
 
 def update_person(email: str, name=None, affiliation=None):
+    """
+    Updates given entity Person:
+    Returns given entity with updated fields.
+    Args:
+        email (str): Email to update
+        name (str, optional): Name to update. Defaults to None.
+        affiliation (str, optional): Affiliation to update. Defaults to None.
+    Returns:
+        Bool: False (if email not in test_person_dict)
+        string: email value otherwise
+    """
     if email not in TEST_PERSON_DICT:
         return False
     if name:
@@ -46,10 +65,25 @@ def update_person(email: str, name=None, affiliation=None):
 
 
 def read_person(email: str):
+    """
+    Reads information from Person fields and returns it
+    Args:
+        string: email
+    Returns:
+        string: email value
+    """
     return TEST_PERSON_DICT.get(email)
 
 
 def delete_person(email: str):
+    """
+    Deletes given entity Person.
+    Returns true if successfully deleted, and false if an error occurred.
+    Args:
+        string: email
+    Returns:
+        Bool: true if deleted, false if not.
+    """
     if email in TEST_PERSON_DICT:
         del TEST_PERSON_DICT[email]
         return True
@@ -57,4 +91,12 @@ def delete_person(email: str):
 
 
 def get_people():
+    """
+    Takes in no arguments but returns a dictionary of users in which
+    each user email must be the key for another dictionary.
+    Args:
+        None
+    Returns:
+        Dict: dictionary of users on user email
+    """
     return TEST_PERSON_DICT
