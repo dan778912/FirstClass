@@ -4,12 +4,13 @@ The endpoint called `endpoints` will return all available endpoints.
 """
 from http import HTTPStatus
 
-from flask import Flask  # , request
-from flask_restx import Resource, Api  # Namespace, fields
+from flask import Flask, request
+from flask_restx import Resource, Api, fields  # Namespace
 from flask_cors import CORS
 
 import werkzeug.exceptions as wz
 import data.people as ppl
+
 
 app = Flask(__name__)
 CORS(app)
@@ -23,9 +24,11 @@ ENDPOINT_EP = '/endpoints'
 ENDPOINT_RESP = 'Available endpoints'
 HELLO_EP = '/hello'
 HELLO_RESP = 'hello'
+MESSAGE = 'Message'
 PEOPLE_EP = '/people'
 PUBLISHER = 'FirstClass'
 PUBLISHER_RESP = 'Publisher'
+RETURN = 'Return'
 TITLE_EP = '/title'
 TITLE_RESP = 'Title'
 TITLE = 'The Journal'
@@ -98,3 +101,36 @@ class PersonDelete(Resource):
             return {f'Deleted {_id}': ret}
         else:
             raise wz.NotFound(f'No such person: {_id}')
+
+
+PEOPLE_CREATE_FLDS = api.model('AddNewPeopleEntry', {
+    ppl.NAME: fields.String,
+    ppl.EMAIL: fields.String,
+    ppl.AFFILIATION: fields.String
+})
+
+
+@api.route(f'{PEOPLE_EP}/create')
+class PersonCreate(Resource):
+    """
+    This class adds a person to the journal database.
+    """
+    @api.response(HTTPStatus.OK, 'Success.')
+    @api.response(HTTPStatus.NOT_ACCEPTABLE, 'Not acceptable.')
+    @api.expect(PEOPLE_CREATE_FLDS)
+    def put(self):
+        """
+        Add a person, return the added person.
+        """
+        try:
+            name = request.json.get(ppl.NAME)
+            affiliation = request.json.get(ppl.AFFILIATION)
+            email = request.json.get(ppl.EMAIL)
+            ret = ppl.create_person(name, affiliation, email)
+        except Exception as err:
+            raise wz.NotAcceptable(f'Could not add person: '
+                                   f'{err=}')
+        return {
+            MESSAGE: 'Person added!',
+            RETURN: ret,
+        }
