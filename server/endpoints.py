@@ -84,12 +84,17 @@ class People(Resource):
 
 @api.route(f'{PEOPLE_EP}/<_id>')
 class PersonDelete(Resource):
-
+    """
+    This class handles the deletion of people.
+    """
     @api.response(HTTPStatus.OK, 'Success.')
     @api.response(HTTPStatus.NOT_FOUND, 'No such person.')
     def delete(self, _id):
+        """
+        The `delete()` method returns the deleted result.
+        """
         ret = ppl.delete_person(_id)
-        if ret is not None:
-            return {'Deleted': ret}
+        if ret is not False:
+            return {f'Deleted {_id}': ret}
         else:
             raise wz.NotFound(f'No such person: {_id}')
