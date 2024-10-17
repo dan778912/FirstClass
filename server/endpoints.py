@@ -82,7 +82,7 @@ class People(Resource):
         """
         The `get()` method returns a dictionary of people from the journal.
         """
-        return ppl.get_people()
+        return ppl.get()
 
 
 @api.route(f'{PEOPLE_EP}/<_id>')
@@ -96,7 +96,7 @@ class PersonDelete(Resource):
         """
         The `delete()` method returns the deleted result.
         """
-        ret = ppl.delete_person(_id)
+        ret = ppl.delete(_id)
         if ret is not False:
             return {f'Deleted {_id}': ret}
         else:
@@ -126,7 +126,7 @@ class PersonCreate(Resource):
             name = request.json.get(ppl.NAME)
             affiliation = request.json.get(ppl.AFFILIATION)
             email = request.json.get(ppl.EMAIL)
-            ret = ppl.create_person(name, affiliation, email)
+            ret = ppl.create(name, affiliation, email)
         except Exception as err:
             raise wz.NotAcceptable(f'Could not add person: '
                                    f'{err=}')
