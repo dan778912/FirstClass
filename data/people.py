@@ -68,10 +68,12 @@ def update(email: str, name=None, affiliation=None, new_email=None):
     if affiliation:
         person[AFFILIATION] = affiliation
     if new_email and new_email != email:
+        # Split the line to conform to PEP 8 standards (79 characters limit)
         TEST_PERSON_DICT[new_email] = person
         del TEST_PERSON_DICT[email]
 
     return person
+
 
 
 def read(email: str):
