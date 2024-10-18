@@ -50,8 +50,16 @@ def test_update_person():
     """
     ppl.create("Update Test", "NYU", "updatetest@nyu.edu")
     updated_person = ppl.update("updatetest@nyu.edu",
-                                       name="Updated Name")
+                                name="Updated Name",
+                                new_email="newemail@nyu.edu")
+    
+    people = ppl.get()
+
     assert updated_person["name"] == "Updated Name"
+
+    assert "updatetest@nyu.edu" not in people
+    assert "newemail@nyu.edu" in people
+    assert updated_person["email"] == "newemail@nyu.edu"
 
 
 def test_delete_person():

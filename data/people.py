@@ -43,30 +43,40 @@ def create(name: str, affiliation: str, email: str):
     return TEST_PERSON_DICT[email]
 
 
-def update(email: str, name=None, affiliation=None):
+def update(email: str, name=None, affiliation=None, new_email=None):
     """
     Updates given entity Person:
-    Returns given entity with updated fields.
+    Can update name, affiliation, or email.
+    
     Args:
-        email (str): Email to update
-        name (str, optional): Name to update. Defaults to None.
-        affiliation (str, optional): Affiliation to update. Defaults to None.
+        email (str): The current email of the person to update.
+        name (str, optional): New name to update. Defaults to None.
+        affiliation (str, optional): New affiliation to update. Defaults to None.
+        new_email (str, optional): New email to update. Defaults to None.
+    
     Returns:
-        Bool: False (if email not in test_person_dict)
-        string: email value otherwise
+        dict: The updated person dictionary if successful.
+        Bool: False if the email does not exist in TEST_PERSON_DICT.
     """
     if email not in TEST_PERSON_DICT:
         return False
+
+    person = TEST_PERSON_DICT[email]
+
     if name:
-        TEST_PERSON_DICT[email][NAME] = name
+        person[NAME] = name
     if affiliation:
-        TEST_PERSON_DICT[email][AFFILIATION] = affiliation
-    return TEST_PERSON_DICT[email]
+        person[AFFILIATION] = affiliation
+    if new_email and new_email != email:
+        TEST_PERSON_DICT[new_email] = person
+        del TEST_PERSON_DICT[email]
+
+    return person
 
 
 def read(email: str):
     """
-    Reads information from Person fields and returns it
+    Reads information from Person fields and returns it.
     Args:
         string: email
     Returns:
