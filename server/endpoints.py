@@ -1,15 +1,13 @@
-"""
-This is the file containing all of the endpoints for our flask app.
-The endpoint called `endpoints` will return all available endpoints.
-"""
 from http import HTTPStatus
-
 from flask import Flask, request
-from flask_restx import Resource, Api, fields  # Namespace
+from flask_restx import Resource, Api, fields
 from flask_cors import CORS
-
 import werkzeug.exceptions as wz
 import data.people as ppl
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 app = Flask(__name__)
