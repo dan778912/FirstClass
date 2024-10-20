@@ -46,7 +46,6 @@ class HelloWorld(Resource):
         return {HELLO_RESP: 'world'}
 
 
-
 @api.route('/endpoints')
 class Endpoints(Resource):
     """
