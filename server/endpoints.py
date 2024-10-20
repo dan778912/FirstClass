@@ -43,10 +43,8 @@ class HelloWorld(Resource):
         A trivial endpoint to see if the server is running.
         It just answers with "hello world."
         """
-        try:
-            return ppl.get()
-        except Exception as e:
-            raise wz.InternalServerError(f"Error fetching people: {e}")
+        return {HELLO_RESP: 'world'}
+
 
 
 @api.route('/endpoints')
