@@ -1,5 +1,7 @@
 # people.py
 
+import data.roles as rls
+
 NAME = "name"
 ROLES = "roles"
 AFFILIATION = "affiliation"
