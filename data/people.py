@@ -28,12 +28,14 @@ TEST_PERSON_DICT = {
 }
 
 
-CHAR_OR_DIGIT = '[A-Za-z0-9]'
+LOCAL_CHARS = r'[A-Za-z0-9.!#$%&\'*+-/=?^_`{|}~]+'
+DOMAIN_CHARS = r'[A-Za-z0-9.-]+'
+DOMAIN_EXTENSION_CHARS = r'[A-Za-z]{2,}'
 
 
 def is_valid_email(email: str) -> bool:
     return re.match(
-        f"{CHAR_OR_DIGIT}.*@{CHAR_OR_DIGIT}+\\.{CHAR_OR_DIGIT}$",
+        f"^{LOCAL_CHARS}@{DOMAIN_CHARS}\\.{DOMAIN_EXTENSION_CHARS}$",
         email
     )
 

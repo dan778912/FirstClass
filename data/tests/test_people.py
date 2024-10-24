@@ -76,6 +76,7 @@ NO_AT = 'zcd220'
 NO_NAME = '@nyu'
 NO_DOMAIN = 'zcd220@'
 NO_DOMAIN_EXTENSION = 'zcd220@nyu'
+COMPLEX_EMAIL = 'zcd.220!220@n.y-u.edu'
 
 
 def test_is_valid_email_no_at():
@@ -89,3 +90,6 @@ def test_is_valid_no_domain():
 
 def test_is_valid_no_domain_extension():
     assert not ppl.is_valid_email(NO_DOMAIN_EXTENSION)
+
+def test_is_valid_complex_email():
+    assert ppl.is_valid_email(COMPLEX_EMAIL)
