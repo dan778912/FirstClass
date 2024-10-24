@@ -70,3 +70,22 @@ def test_delete_person():
     ppl.create("Delete Test", "NYU", "deletetest@nyu.edu")
     assert ppl.delete("deletetest@nyu.edu")
     assert ppl.read("deletetest@nyu.edu") is None
+
+
+NO_AT = 'zcd220'
+NO_NAME = '@nyu'
+NO_DOMAIN = 'zcd220@'
+NO_DOMAIN_EXTENSION = 'zcd220@nyu'
+
+
+def test_is_valid_email_no_at():
+    assert not ppl.is_valid_email(NO_AT)
+
+def test_is_valid_no_name():
+    assert not ppl.is_valid_email(NO_NAME)
+
+def test_is_valid_no_domain():
+    assert not ppl.is_valid_email(NO_DOMAIN)
+
+def test_is_valid_no_domain_extension():
+    assert not ppl.is_valid_email(NO_DOMAIN_EXTENSION)
