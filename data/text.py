@@ -39,31 +39,43 @@ def read():
     return text
 
 
-def create():
+def create(key: str, title: str, text: str)-> bool:
     """
     Creates text:
         - Text to add (str)
         - returns a dictionary of keys
     """
-    pass
+    if key in text_dict:
+        return False  # Key already exists, creation failed
+    text_dict[key] = {TITLE: title, TEXT: text}
+    return True
 
 
-def delete():
+def delete(key: str)-> bool:
     """
     Deletes text:
         - Text to delete (str)
         - returns True if deleted successfully, False otherwise
     """
-    pass
+    if key in text_dict:
+        del text_dict[key]
+        return True
+    return False  # Key not found
 
 
-def update():
+def update(key: str, title: str = None, text: str = None)-> bool:
     """
     Updates text:
         - text to update (str)
         - returns dictionary key that's updated
     """
-    pass
+    if key not in text_dict:
+        return False  # Key not found
+    if title:
+        text_dict[key][TITLE] = title
+    if text:
+        text_dict[key][TEXT] = text
+    return True
 
 
 def read_one(key: str) -> dict:
