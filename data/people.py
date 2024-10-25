@@ -40,6 +40,17 @@ def is_valid_email(email: str) -> bool:
     )
 
 
+def is_valid_person(name: str, affiliation: str, email: str,
+                    role: str) -> bool:
+    if email in TEST_PERSON_DICT:
+        raise ValueError(f'Adding duplicate {email=}')
+    if not is_valid_email(email):
+        raise ValueError(f'Invalid email: {email}')
+    if not rls.is_valid(role):
+        raise ValueError(f'Invalid role: {role}')
+    return True
+
+
 def create(name: str, affiliation: str, email: str):
     """
     Creates a new entity Person.
@@ -115,7 +126,7 @@ def delete(email: str):
     return False
 
 
-def get():
+def get(role=None, affiliation=None):
     """
     Takes in no arguments but returns a dictionary of users in which
     each user email must be the key for another dictionary.
@@ -124,15 +135,14 @@ def get():
     Returns:
         Dict: dictionary of users on user email
     """
-    return TEST_PERSON_DICT
+    if not role and not affiliation:
+        return TEST_PERSON_DICT
 
+    filtered_dict = {}
+    for email, person in TEST_PERSON_DICT.items():
+        if role and role in person.get(ROLES, []):
+            filtered_dict[email] = person
+        elif affiliation and person.get(AFFILIATION) == affiliation:
+            filtered_dict[email] = person
 
-def is_valid_person(name: str, affiliation: str, email: str,
-                    role: str) -> bool:
-    if email in TEST_PERSON_DICT:
-        raise ValueError(f'Adding duplicate {email=}')
-    if not is_valid_email(email):
-        raise ValueError(f'Invalid email: {email}')
-    if not rls.is_valid(role):
-        raise ValueError(f'Invalid role: {role}')
-    return True
+    return filtered_dict

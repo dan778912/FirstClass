@@ -39,7 +39,7 @@ def read():
     return text
 
 
-def create(key: str, title: str, text: str)-> bool:
+def create(key: str, title: str, text: str) -> bool:
     """
     Creates text:
         - Text to add (str)
@@ -51,7 +51,7 @@ def create(key: str, title: str, text: str)-> bool:
     return True
 
 
-def delete(key: str)-> bool:
+def delete(key: str) -> bool:
     """
     Deletes text:
         - Text to delete (str)
@@ -63,7 +63,7 @@ def delete(key: str)-> bool:
     return False  # Key not found
 
 
-def update(key: str, title: str = None, text: str = None)-> bool:
+def update(key: str, title: str = None, text: str = None) -> bool:
     """
     Updates text:
         - text to update (str)
