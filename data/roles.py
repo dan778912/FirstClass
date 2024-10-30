@@ -4,12 +4,19 @@ This module manages person roles for a journal.
 """
 AUTHOR_CODE = 'AU'
 TEST_CODE = AUTHOR_CODE
+ED_CODE = 'ED'
+ME_CODE = 'ME'
+CE_CODE = 'CE'
 
 ROLES = {
     AUTHOR_CODE: 'Author',
-    'ED': 'Editor',
+    CE_CODE: 'Consulting Editor',
+    ED_CODE: 'EDITOR',
+    ME_CODE: 'Managing Editor',
     'RE': 'Referee',
 }
+
+MH_ROLES = [CE_CODE, ED_CODE, ME_CODE]
 
 
 def get_roles() -> dict:
