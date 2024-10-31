@@ -10,6 +10,7 @@ EMAIL = "email"
 
 TEST_EMAIL = "aim9061@nyu.edu"
 PROF_TEST_EMAIL = "ejc369@nyu.edu"
+DEL_EMAIL = 'delete@nyu.edu'
 
 
 TEST_PERSON_DICT = {
@@ -25,12 +26,18 @@ TEST_PERSON_DICT = {
         AFFILIATION: "NYU",
         EMAIL: PROF_TEST_EMAIL,
     },
+    DEL_EMAIL: {
+        NAME: 'Another Person',
+        ROLES: [],
+        AFFILIATION: 'NYU',
+        EMAIL: DEL_EMAIL,
+    }
 }
 
 
 LOCAL_CHARS = r'[A-Za-z0-9.!#$%&\'*+-/=?^_`{|}~]+'
 DOMAIN_CHARS = r'[A-Za-z0-9.-]+'
-DOMAIN_EXTENSION_CHARS = r'[A-Za-z]{2,}'
+DOMAIN_EXTENSION_CHARS = r'[A-Za-z]{2,3}'
 
 
 def is_valid_email(email: str) -> bool:
@@ -40,18 +47,26 @@ def is_valid_email(email: str) -> bool:
     )
 
 
-def is_valid_person(name: str, affiliation: str, email: str,
-                    role: str) -> bool:
-    if email in TEST_PERSON_DICT:
-        raise ValueError(f'Adding duplicate {email=}')
+def is_valid_person(
+    name: str,
+    affiliation: str,
+    email: str,
+    role: str = None,
+    roles: list = None
+) -> bool:
     if not is_valid_email(email):
         raise ValueError(f'Invalid email: {email}')
-    if not rls.is_valid(role):
-        raise ValueError(f'Invalid role: {role}')
+    if role:
+        if not rls.is_valid(role):
+            raise ValueError(f'Invalid role: {role}')
+    elif roles:
+        for role in roles:
+            if not rls.is_valid(role):
+                raise ValueError(f'Invalid role: {role}')
     return True
 
 
-def create(name: str, affiliation: str, email: str):
+def create(name: str, affiliation: str, email: str, role: str):
     """
     Creates a new entity Person.
     Returns new Person with fields: name, affiliation, email.
@@ -62,12 +77,17 @@ def create(name: str, affiliation: str, email: str):
     """
     if email in TEST_PERSON_DICT:
         raise ValueError(f"Trying to add duplicate: {email=}")
-    TEST_PERSON_DICT[email] = {
-        NAME: name,
-        AFFILIATION: affiliation,
-        EMAIL: email,
-    }
-    return TEST_PERSON_DICT[email]
+    if is_valid_person(name, affiliation, email, role=role):
+        roles = []
+        if role:
+            roles.append(role)
+        TEST_PERSON_DICT[email] = {
+            NAME: name,
+            AFFILIATION: affiliation,
+            EMAIL: email,
+            ROLES: roles
+        }
+        return email
 
 
 def update(email: str, name=None, affiliation=None, new_email=None):
@@ -100,13 +120,22 @@ def update(email: str, name=None, affiliation=None, new_email=None):
     return person
 
 
-def read(email: str):
+def read():
     """
     Reads information from Person fields and returns it.
     Args:
         string: email
     Returns:
         string: email value
+    """
+    people = TEST_PERSON_DICT
+    return people
+
+
+def read_one(email: str) -> dict:
+    """
+    Return a person record if email present in DB,
+    else None.
     """
     return TEST_PERSON_DICT.get(email)
 
