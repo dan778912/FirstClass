@@ -23,6 +23,10 @@ def get_roles() -> dict:
     return ROLES
 
 
+def get_role_codes() -> list:
+    return list(ROLES.keys())
+
+
 def get_masthead_roles() -> dict:
     mh_roles = get_roles()
     del_mh_roles = []
