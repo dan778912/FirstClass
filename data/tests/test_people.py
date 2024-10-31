@@ -100,6 +100,16 @@ def test_create_bad_email():
         )
 
 
+def test_get_masthead():
+    """
+    Tests the get_masthead function.
+    Ensures that the result is a dictionary and non-empty.
+    """
+    mh = ppl.get_masthead()
+    assert isinstance(mh, dict)
+    assert len(mh) > 0
+
+
 NO_AT = 'zcd220'
 NO_NAME = '@nyu'
 NO_DOMAIN = 'zcd220@'
