@@ -1,45 +1,41 @@
+# roles.py
 
 """
 This module manages person roles for a journal.
 """
 AUTHOR_CODE = 'AU'
-TEST_CODE = AUTHOR_CODE
 ED_CODE = 'ED'
 ME_CODE = 'ME'
 CE_CODE = 'CE'
+RE_CODE = 'RE'
+TEST_CODE = AUTHOR_CODE
 
-ROLES = {
+PERSON_ROLES = {
     AUTHOR_CODE: 'Author',
     CE_CODE: 'Consulting Editor',
     ED_CODE: 'EDITOR',
     ME_CODE: 'Managing Editor',
-    'RE': 'Referee',
+    RE_CODE: 'Referee',
 }
 
-MH_ROLES = [CE_CODE, ED_CODE, ME_CODE]
+MASTHEAD_ROLES = [CE_CODE, ED_CODE, ME_CODE]
 
 
 def get_roles() -> dict:
-    return ROLES
+    return PERSON_ROLES
 
 
 def get_role_codes() -> list:
-    return list(ROLES.keys())
+    return list(PERSON_ROLES.keys())
 
 
 def get_masthead_roles() -> dict:
-    mh_roles = get_roles()
-    del_mh_roles = []
-    for role in mh_roles:
-        if role not in MH_ROLES:
-            del_mh_roles.append(role)
-    for del_role in del_mh_roles:
-        del mh_roles[del_role]
-    return mh_roles
+    return {code: name for code, name in PERSON_ROLES.items() if code in
+            MASTHEAD_ROLES}
 
 
 def is_valid(code: str) -> bool:
-    return code in ROLES
+    return code in PERSON_ROLES
 
 
 def main():

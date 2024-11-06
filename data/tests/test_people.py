@@ -43,7 +43,7 @@ def test_update_person():
     updated_person = ppl.update("updatetest@nyu.edu",
                                 name="Updated Name",
                                 new_email="newemail@nyu.edu")
-    
+
     people = ppl.get()
 
     assert updated_person["name"] == "Updated Name"
@@ -93,21 +93,11 @@ def test_read_one_not_there():
 def test_create_bad_email():
     with pytest.raises(ValueError):
         ppl.create(
-            "Irrelevant name", 
-            "Irrelevant affiliation", 
-            "invalid email", 
+            "Irrelevant name",
+            "Irrelevant affiliation",
+            "invalid email",
             TEST_CODE
         )
-
-
-def test_get_masthead():
-    """
-    Tests the get_masthead function.
-    Ensures that the result is a dictionary and non-empty.
-    """
-    mh = ppl.get_masthead()
-    assert isinstance(mh, dict)
-    assert len(mh) > 0
 
 
 NO_AT = 'zcd220'
@@ -122,20 +112,26 @@ COMPLEX_EMAIL = 'zcd.220!220@n.y-u.edu'
 def test_is_valid_email_no_at():
     assert not ppl.is_valid_email(NO_AT)
 
+
 def test_is_valid_no_name():
     assert not ppl.is_valid_email(NO_NAME)
+
 
 def test_is_valid_no_domain():
     assert not ppl.is_valid_email(NO_DOMAIN)
 
+
 def test_is_valid_no_domain_extension():
     assert not ppl.is_valid_email(NO_DOMAIN_EXTENSION)
+
 
 def test_is_valid_email_domain_too_short():
     assert not ppl.is_valid_email(DOMAIN_TOO_SHORT)
 
+
 def test_is_valid_email_domain_too_long():
     assert not ppl.is_valid_email(DOMAIN_TOO_LONG)
+
 
 def test_is_valid_complex_email():
     assert ppl.is_valid_email(COMPLEX_EMAIL)

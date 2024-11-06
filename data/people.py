@@ -2,6 +2,7 @@
 import re
 
 import data.roles as rls
+from data.roles import PERSON_ROLES
 
 NAME = "name"
 ROLES = "roles"
@@ -58,6 +59,7 @@ def is_valid_person(
         raise ValueError(f'Invalid email: {email}')
     if role:
         if not rls.is_valid(role):
+            print("these are person roles: ", PERSON_ROLES)
             raise ValueError(f'Invalid role: {role}')
     elif roles:
         for role in roles:
@@ -76,33 +78,6 @@ def has_role(person: dict, role: str) -> bool:
         bool: True if the role is found in the person's roles, False otherwise.
     """
     return role in person.get(ROLES, [])
-
-
-def create_mh_rec(person: dict) -> dict:  # Can be removed if not needed
-    """
-    Creates a simplified record for masthead use.
-    """
-    return {NAME: person[NAME], EMAIL: person[EMAIL]}
-
-
-def get_masthead() -> dict:  # Can be removed if not needed
-    """
-    Groups people by their roles for masthead use.
-    Returns:
-        dict: Dictionary where keys are role descriptions
-              and values are lists of people with that role.
-    """
-    masthead = {}
-    mh_roles = rls.get_masthead_roles()
-    for mh_role, text in mh_roles.items():
-        people_w_role = []
-        people = read()
-        for _id, person in people.items():
-            if has_role(person, mh_role):
-                rec = create_mh_rec(person)
-                people_w_role.append(rec)
-        masthead[text] = people_w_role
-    return masthead
 
 
 def create(name: str, affiliation: str, email: str, role: str):

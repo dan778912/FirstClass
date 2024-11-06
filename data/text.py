@@ -42,8 +42,8 @@ def read():
 def create(key: str, title: str, text: str) -> bool:
     """
     Creates text:
-        - Text to add (str)
-        - returns a dictionary of keys
+        - takes key, title, text (all str)
+        - returns True if created successfully, False otherwise
     """
     if key in text_dict:
         return False  # Key already exists, creation failed
@@ -66,8 +66,10 @@ def delete(key: str) -> bool:
 def update(key: str, title: str = None, text: str = None) -> bool:
     """
     Updates text:
-        - text to update (str)
-        - returns dictionary key that's updated
+        -   key to update (str),
+            title to update (optional),
+            text to update (optional)
+        -   returns True if updated successfully, False otherwise
     """
     if key not in text_dict:
         return False  # Key not found
