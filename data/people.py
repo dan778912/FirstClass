@@ -6,6 +6,7 @@ from data.roles import PERSON_ROLES
 
 NAME = "name"
 ROLES = "roles"
+ROLE = "role"
 AFFILIATION = "affiliation"
 EMAIL = "email"
 
@@ -104,7 +105,7 @@ def create(name: str, affiliation: str, email: str, role: str):
         return email
 
 
-def update(email: str, name=None, affiliation=None, new_email=None):
+def update(email: str, name=None, affiliation=None, new_email=None, role=None):
     """
     Updates a Person's name, affiliation, or email.
 
@@ -113,12 +114,16 @@ def update(email: str, name=None, affiliation=None, new_email=None):
         name (str, optional): New name to update.
         affiliation (str, optional): New affiliation to update.
         new_email (str, optional): New email to update.
+        role (str, optional): New role to add to roles list.
 
     Returns:
         dict: Updated person dictionary, or False if email not found.
     """
     if email not in TEST_PERSON_DICT:
-        return False
+        raise ValueError(
+            f'Trying to update person that does not exist: '
+            f'{email=}'
+        )
 
     person = TEST_PERSON_DICT[email]
 
@@ -126,7 +131,14 @@ def update(email: str, name=None, affiliation=None, new_email=None):
         person[NAME] = name
     if affiliation:
         person[AFFILIATION] = affiliation
+    if role:
+        if ROLES not in person:
+            person[ROLES] = []
+        if role not in person[ROLES]:
+            person[ROLES].append(role)
     if new_email and new_email != email:
+        if new_email in TEST_PERSON_DICT:
+            raise ValueError('Email already in use')
         person[EMAIL] = new_email
         TEST_PERSON_DICT[new_email] = person
         del TEST_PERSON_DICT[email]

@@ -105,7 +105,8 @@ class PersonDelete(Resource):
 PEOPLE_CREATE_FLDS = api.model('AddNewPeopleEntry', {
     ppl.NAME: fields.String,
     ppl.EMAIL: fields.String,
-    ppl.AFFILIATION: fields.String
+    ppl.AFFILIATION: fields.String,
+    ppl.ROLE: fields.String
 })
 
 
@@ -125,7 +126,8 @@ class PersonCreate(Resource):
             name = request.json.get(ppl.NAME)
             affiliation = request.json.get(ppl.AFFILIATION)
             email = request.json.get(ppl.EMAIL)
-            ret = ppl.create(name, affiliation, email)
+            role = request.json.get(ppl.ROLE)
+            ret = ppl.create(name, affiliation, email, role)
         except Exception as err:
             raise wz.NotAcceptable(f'Could not add person: '
                                    f'{err=}')
@@ -133,6 +135,36 @@ class PersonCreate(Resource):
             MESSAGE: 'Person added!',
             RETURN: ret,
         }
+
+
+@api.route(f'{PEOPLE_EP}/update/<current_email>')
+class PersonUpdate(Resource):
+    """
+    This class updates an existing person in the journal database.
+    """
+    @api.response(HTTPStatus.OK, 'Success.')
+    @api.response(HTTPStatus.NOT_ACCEPTABLE, 'Not acceptable.')
+    @api.expect(PEOPLE_CREATE_FLDS)
+    def put(self, current_email):
+        """
+        Update the person with the provided email, return the updated person.
+        """
+        data = request.json
+        try:
+            name = data.get('name')
+            affiliation = data.get('affiliation')
+            new_email = data.get('new email')
+            role = data.get('role')
+
+            ret = ppl.update(current_email, name, affiliation, new_email, role)
+
+            return {
+                MESSAGE: 'Person updated!',
+                RETURN: ret
+            }
+        except Exception as err:
+            raise wz.NotAcceptable(f'Could not update person: '
+                                   f'{err=}')
 
 
 MASTHEAD = 'Masthead'
