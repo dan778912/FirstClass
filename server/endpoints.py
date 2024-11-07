@@ -4,6 +4,7 @@ from flask_restx import Resource, Api, fields
 from flask_cors import CORS
 import werkzeug.exceptions as wz
 import data.people as ppl
+import data.masthead as mh
 import sys
 import os
 
@@ -132,3 +133,15 @@ class PersonCreate(Resource):
             MESSAGE: 'Person added!',
             RETURN: ret,
         }
+
+
+MASTHEAD = 'Masthead'
+
+
+@api.route(f'{PEOPLE_EP}/masthead')
+class Masthead(Resource):
+    """
+    Get a journal's masthead.
+    """
+    def get(self):
+        return {MASTHEAD: mh.get_masthead()}

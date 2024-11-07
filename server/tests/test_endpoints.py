@@ -51,3 +51,17 @@ def test_del_person():
 
     double_delete_resp = TEST_CLIENT.delete(f'{ep.PEOPLE_EP}/{person_id}')
     assert double_delete_resp.status_code == 404
+
+
+def test_get_masthead():
+    """
+    Tests to ensure that `get_masthead()` returns the right structure.
+    """
+    resp = TEST_CLIENT.get(f'{ep.PEOPLE_EP}/masthead')
+    resp_json = resp.get_json()
+
+    assert resp.status_code == OK, f"Expected {OK}, got {resp.status_code}"
+    assert ep.MASTHEAD in resp_json, "Response missing expected 'Masthead' key"
+    assert isinstance(resp_json[ep.MASTHEAD], dict), (
+        "Expected 'Masthead' value to be a dictionary"
+        )
