@@ -16,7 +16,6 @@ def test_get_masthead():
 
 
 def test_create_mh_rec():
-
     person = {
         NAME: "Jane Doe",
         EMAIL: "jane.doe@nyu.edu",
@@ -31,5 +30,7 @@ def test_create_mh_rec():
         f"Expected EMAIL to be 'jane.doe@nyu.edu', got {result[EMAIL]}")
 
 
-def test_update_masthead_person():
-    pass
+def test_get_mh_fields():
+    flds = mast.get_mh_fields()
+    assert isinstance(flds, list)
+    assert len(flds) > 0

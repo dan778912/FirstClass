@@ -1,17 +1,19 @@
 # masthead.py
 
-from data.people import has_role, read, NAME, EMAIL
+from data.people import has_role, read, NAME, EMAIL, AFFILIATION
 import data.roles as rls
 
+MH_FIELDS = [NAME, AFFILIATION]
 
-def create_mh_rec(person: dict) -> dict:  # Can be removed if not needed
+
+def create_mh_rec(person: dict) -> dict:
     """
     Creates a simplified record for masthead use.
     """
     return {NAME: person[NAME], EMAIL: person[EMAIL]}
 
 
-def get_masthead() -> dict:  # Can be removed if not needed
+def get_masthead() -> dict:
     """
     Groups people by their roles for masthead use.
     Returns:
@@ -31,5 +33,10 @@ def get_masthead() -> dict:  # Can be removed if not needed
     return masthead
 
 
-def update_masthead_person() -> bool:
-    pass
+def get_mh_fields(journal_code=None) -> list:
+    """
+    fetches masthead fields.
+    - takes journal code in optionally
+    - returns masthead fields in form of list
+    """
+    return MH_FIELDS

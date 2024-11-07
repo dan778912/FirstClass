@@ -5,6 +5,9 @@ __pycache__/
 
 # virtual env
 demo-repo4-venv
+pythonenv
+setup_venv.sh
+
 
 # vim files
 *~

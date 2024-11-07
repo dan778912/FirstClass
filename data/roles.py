@@ -8,14 +8,19 @@ ED_CODE = 'ED'
 ME_CODE = 'ME'
 CE_CODE = 'CE'
 RE_CODE = 'RE'
+CONSULT_CODE = 'CO'
+TS_CODE = 'TS'
 TEST_CODE = AUTHOR_CODE
 
 PERSON_ROLES = {
     AUTHOR_CODE: 'Author',
-    CE_CODE: 'Consulting Editor',
-    ED_CODE: 'EDITOR',
+    CONSULT_CODE: 'Consulting Editor',
+    CE_CODE: 'Copy Editor',
+    ED_CODE: 'Editor',
     ME_CODE: 'Managing Editor',
     RE_CODE: 'Referee',
+    TS_CODE: 'Typesetter'
+
 }
 
 MASTHEAD_ROLES = [CE_CODE, ED_CODE, ME_CODE]
