@@ -20,7 +20,6 @@ PERSON_ROLES = {
     ME_CODE: 'Managing Editor',
     RE_CODE: 'Referee',
     TS_CODE: 'Typesetter'
-
 }
 
 MASTHEAD_ROLES = [CE_CODE, ED_CODE, ME_CODE]
@@ -39,8 +38,8 @@ def get_masthead_roles() -> dict:
             MASTHEAD_ROLES}
 
 
-def is_valid(code: str) -> bool:
-    return code in PERSON_ROLES
+def is_valid(role: str) -> bool:
+    return role in PERSON_ROLES or role in PERSON_ROLES.values()
 
 
 def main():

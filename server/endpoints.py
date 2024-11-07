@@ -122,19 +122,22 @@ class PersonCreate(Resource):
         """
         Add a person, return the added person.
         """
+        data = request.json
         try:
-            name = request.json.get(ppl.NAME)
-            affiliation = request.json.get(ppl.AFFILIATION)
-            email = request.json.get(ppl.EMAIL)
-            role = request.json.get(ppl.ROLE)
+            name = data.get(ppl.NAME)
+            affiliation = data.get(ppl.AFFILIATION)
+            email = data.get(ppl.EMAIL)
+            role = data.get(ppl.ROLE)
+
             ret = ppl.create(name, affiliation, email, role)
+
+            return {
+                        MESSAGE: 'Person added!',
+                        RETURN: ret,
+                    }
         except Exception as err:
             raise wz.NotAcceptable(f'Could not add person: '
                                    f'{err=}')
-        return {
-            MESSAGE: 'Person added!',
-            RETURN: ret,
-        }
 
 
 @api.route(f'{PEOPLE_EP}/update/<current_email>')
