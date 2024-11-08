@@ -34,10 +34,23 @@ def test_title():
 def test_get_people():
     resp = TEST_CLIENT.get(ep.PEOPLE_EP)
     resp_json = resp.get_json()
+    print(resp_json)
     for _id, person in resp_json.items():
         assert isinstance(_id, str)
         assert len(_id) > 0
         assert NAME in person
+
+
+def test_create_person():
+    pass
+
+
+def test_update_person():
+    pass
+
+
+def test_get_person():
+    pass
 
 
 def test_del_person():
@@ -45,12 +58,14 @@ def test_del_person():
     tests to ensure that successful status codes are received if
     person is successfully deleted. otherwise should return a 404 status code
     """
-    person_id = "aim9061@nyu.edu"
+
+    person_id = "delete@nyu.edu"
+
     resp = TEST_CLIENT.delete(f'{ep.PEOPLE_EP}/{person_id}')
-    assert resp.status_code == 200
+    assert resp.status_code == OK
 
     double_delete_resp = TEST_CLIENT.delete(f'{ep.PEOPLE_EP}/{person_id}')
-    assert double_delete_resp.status_code == 404
+    assert double_delete_resp.status_code == NOT_FOUND
 
 
 def test_get_masthead():

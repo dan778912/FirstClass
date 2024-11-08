@@ -74,30 +74,38 @@ class JournalTitle(Resource):
 @api.route(PEOPLE_EP)
 class People(Resource):
     """
-    This class handles creating, getting, reading, updating
-    and deleting people.
+    This class handles creating, reading, updating
+    and deleting journal people.
     """
     def get(self):
         """
-        The `get()` method returns a dictionary of people from the journal.
+        Retrieve the journal people.
         """
-        return ppl.get()
+        return ppl.read()
 
 
 @api.route(f'{PEOPLE_EP}/<_id>')
-class PersonDelete(Resource):
+class Person(Resource):
     """
-    This class handles the deletion of people.
+    This class handles creating, getting, reading, updating
+    and deleting people.
     """
+    def get(self, _id):
+        """
+        Retrieve a journal person.
+        """
+        person = ppl.read_one(_id)
+        if person:
+            return person
+        else:
+            raise wz.NotFound(f'No such record: {_id}')
+
     @api.response(HTTPStatus.OK, 'Success.')
     @api.response(HTTPStatus.NOT_FOUND, 'No such person.')
     def delete(self, _id):
-        """
-        The `delete()` method returns the deleted result.
-        """
         ret = ppl.delete(_id)
         if ret is not False:
-            return {f'Deleted {_id}': ret}
+            return {'Deleted': ret}
         else:
             raise wz.NotFound(f'No such person: {_id}')
 
@@ -158,9 +166,7 @@ class PersonUpdate(Resource):
             affiliation = data.get('affiliation')
             new_email = data.get('new email')
             role = data.get('role')
-
             ret = ppl.update(current_email, name, affiliation, new_email, role)
-
             return {
                 MESSAGE: 'Person updated!',
                 RETURN: ret
