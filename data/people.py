@@ -201,39 +201,3 @@ def get(role=None, affiliation=None):
             filtered_dict[email] = person
 
     return filtered_dict
-
-
-MH_FIELDS = [NAME, AFFILIATION]
-
-
-def get_mh_fields(journal_code=None) -> list:
-    return MH_FIELDS
-
-
-def create_mh_rec(person: dict) -> dict:
-    mh_rec = {}
-    for field in get_mh_fields():
-        mh_rec[field] = person.get(field, '')
-    return mh_rec
-
-
-def get_masthead() -> dict:
-    masthead = {}
-    mh_roles = rls.get_masthead_roles()
-    for mh_role, text in mh_roles.items():
-        people_w_role = []
-        people = read()
-        for _id, person in people.items():
-            if has_role(person, mh_role):
-                rec = create_mh_rec(person)
-                people_w_role.append(rec)
-        masthead[text] = people_w_role
-    return masthead
-
-
-def main():
-    print(get_masthead())
-
-
-if __name__ == '__main__':
-    main()
