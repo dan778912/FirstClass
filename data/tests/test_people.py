@@ -1,11 +1,31 @@
 # test_people.py
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
 import data.people as ppl
 import pytest
+from unittest.mock import patch
 from data.roles import TEST_CODE
 
 
 ADD_EMAIL = "callahan@nyu.edu"
 TEMP_EMAIL = "temp_email@temp.com"
+
+# Fixtures
+@pytest.fixture(scope="function")
+def temp_person():
+    ret = ppl.create("John Doe", "NYU", TEMP_EMAIL, TEST_CODE)
+    yield ret
+    ppl.delete(ret)
+
+
+@pytest.fixture(scope="function")
+def duplicate_person():
+    email = "duplicate@nyu.edu"
+    ppl.create("Duplicate User", "NYU", email, TEST_CODE)
+    yield email
+    ppl.delete(email)
 
 
 def test_get_people():
@@ -98,6 +118,34 @@ def test_create_bad_email():
             "invalid email",
             TEST_CODE
         )
+
+# Check for duplicate email
+def test_create_duplicate_person():
+    duplicate_person = "duplicate@nyu.edu"
+    ppl.create("Original User", "NYU", duplicate_person, TEST_CODE)
+    with pytest.raises(ValueError, match="Trying to add duplicate: email="):
+        ppl.create("Duplicate User", "NYU", duplicate_person, TEST_CODE)
+
+
+
+@pytest.mark.skip(reason="Feature not yet implemented")
+def test_partial_update_person():
+    pass
+
+
+@patch("data.people.read")
+def test_get_people_mocked_read(mock_read):
+    mock_read.return_value = {
+        "mock_id": {ppl.NAME: "Mock User", ppl.AFFILIATION: "NYU"}
+    }
+    people = ppl.read()
+    assert "mock_id" in people
+    assert people["mock_id"][ppl.NAME] == "Mock User"
+
+
+def test_create_person_with_invalid_email():
+    with pytest.raises(ValueError, match="Invalid email"):
+        ppl.create("Invalid Email User", "NYU", "invalid-email", TEST_CODE)
 
 
 NO_AT = 'zcd220'
