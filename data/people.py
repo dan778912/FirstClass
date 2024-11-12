@@ -154,8 +154,7 @@ def read():
     Returns:
         string: email value
     """
-    people = TEST_PERSON_DICT
-    return people
+    return TEST_PERSON_DICT
 
 
 def read_one(email: str) -> dict:

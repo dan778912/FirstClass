@@ -35,8 +35,7 @@ def read():
         - Returns a dictionary of users keyed on user email.
         - Each user email must be the key for another dictionary.
     """
-    text = text_dict
-    return text
+    return text_dict
 
 
 def create(key: str, title: str, text: str) -> bool:

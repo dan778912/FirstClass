@@ -27,6 +27,7 @@ def valid_person_data():
         "role": "Student"
     }
 
+
 @pytest.fixture
 def existing_person_id():
     # This should be an ID that exists in the test setup
@@ -56,7 +57,27 @@ def test_get_people():
         assert NAME in person
 
 
-@pytest.mark.skip(reason="Skipping get_people test temporarily")
+@pytest.mark.skip(reason="Not implemented test_get_text yet")
+def test_get_text():
+    pass
+
+
+@pytest.mark.skip(reason="Not implemented test_del_text yet")
+def test_del_text():
+    pass
+
+
+@pytest.mark.skip(reason="Not implemented test_create_text yet")
+def test_create_text():
+    pass
+
+
+@pytest.mark.skip(reason="Not implemented test_update_text yet")
+def test_update_text():
+    pass
+
+
+@pytest.mark.skip(reason="Skipping create_person test temporarily")
 def test_create_person(valid_person_data):
     with patch('data.people.create') as mock_create:
         mock_create.return_value = valid_person_data['email']
@@ -75,7 +96,7 @@ def test_create_person_invalid_email():
         "role": "Student"
     }
     resp = TEST_CLIENT.put(f'{ep.PEOPLE_EP}/create', json=invalid_data)
-    
+
     # Assert that the response status code indicates an unacceptable request
     assert resp.status_code == NOT_ACCEPTABLE, f"Expected {NOT_ACCEPTABLE}, got {resp.status_code}"
 
@@ -99,6 +120,10 @@ def test_update_person(existing_person_id, valid_person_data):
 
 
 def test_get_person(existing_person_id):
+    """
+    tests to ensure that the correct response is givevn
+    from the get_person endpoint.
+    """
     with patch('data.people.read_one', return_value={"name": "Test User"}):
         resp = TEST_CLIENT.get(f'{ep.PEOPLE_EP}/{existing_person_id}')
         assert resp.status_code == OK
@@ -108,10 +133,10 @@ def test_get_person(existing_person_id):
 
 def test_del_person():
     person_id = "delete@nyu.edu"
-    
+
     # Attempt to delete the person (assuming it exists)
     resp = TEST_CLIENT.delete(f'{ep.PEOPLE_EP}/{person_id}')
-    
+
     # Check if the person was successfully deleted or not found
     if resp.status_code == OK:
         assert resp.status_code == OK

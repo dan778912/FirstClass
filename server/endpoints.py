@@ -4,6 +4,7 @@ from flask_restx import Resource, Api, fields
 from flask_cors import CORS
 import werkzeug.exceptions as wz
 import data.people as ppl
+import data.text as text
 import data.masthead as mh
 import sys
 import os
@@ -31,6 +32,7 @@ RETURN = 'Return'
 TITLE_EP = '/title'
 TITLE_RESP = 'Title'
 TITLE = 'The Journal'
+TEXT_EP = '/text'
 
 
 @api.route(HELLO_EP)
@@ -64,11 +66,21 @@ class Endpoints(Resource):
 @api.route(TITLE_EP)
 class JournalTitle(Resource):
     def get(self):
+        """
+        Retrieve jounal info including title, editor, and publisher
+        """
         return {
             TITLE_RESP: TITLE,
             EDITOR_RESP: EDITOR,
             PUBLISHER_RESP: PUBLISHER
         }
+
+
+@api.route(TEXT_EP)
+class JournalText(Resource):
+    def get(self):
+        """Retrieve journal text"""
+        return text.read()
 
 
 @api.route(PEOPLE_EP)

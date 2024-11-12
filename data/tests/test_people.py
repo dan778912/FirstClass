@@ -5,13 +5,15 @@ from unittest.mock import patch
 import pytest
 import data.people as ppl
 from data.roles import TEST_CODE
+sys.path.insert(0, os.path.abspath(os.path.join
+                                   (os.path.dirname(__file__), '../../')))
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 ADD_EMAIL = "callahan@nyu.edu"
 TEMP_EMAIL = "temp_email@temp.com"
 
-# Fixtures
+
 @pytest.fixture(scope="function")
 def temp_person():
     with patch('data.people.create') as mock_create:
@@ -42,10 +44,12 @@ def test_get_people():
 
 def test_create_person():
     """
-    This test ensures the `create_person` function works by adding an email to the people dictionary.
+    This test ensures the `create_person` function works
+    by adding an email to the people dictionary.
     """
     people = ppl.read()
-    assert ADD_EMAIL not in people  # Check that ADD_EMAIL is not already present
+    # Check that ADD_EMAIL is not already present
+    assert ADD_EMAIL not in people
 
     # Create the person
     ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE)
