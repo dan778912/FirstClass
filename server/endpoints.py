@@ -79,8 +79,31 @@ class JournalTitle(Resource):
 @api.route(TEXT_EP)
 class JournalText(Resource):
     def get(self):
-        """Retrieve journal text"""
+        """
+        Retrieve journal text
+        """
         return text.read()
+
+
+@api.route(f'{TEXT_EP}/<key>')
+class Text(Resource):
+    def get(self, key):
+        """Returns specific page dictionary from given key."""
+        page = text.read_one(key)
+        if page:
+            return page
+        else:
+            raise (f"No such record: {key}")
+
+    def delete(self, key):
+        """
+        Deletes page from text dictionary.
+        """
+        ret = text.delete(key)
+        if ret is not False:
+            return {'Deleted': ret}
+        else:
+            raise wz.NotFound(f'No such key: {key}')
 
 
 @api.route(PEOPLE_EP)
