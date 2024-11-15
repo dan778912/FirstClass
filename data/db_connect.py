@@ -81,3 +81,34 @@ def fetch_all_as_dict(key, collection, db=GAME_DB):
         del doc[MONGO_ID]
         ret[doc[key]] = doc
     return ret
+
+
+def read(collection, db=GAME_DB, no_id=True) -> list:
+    """
+    Return all documents in the collection as a list.
+    Optionally remove the `_id` field from each document.
+    """
+    ret = []
+    for doc in client[db][collection].find():
+        if no_id:
+            del doc[MONGO_ID]
+        ret.append(doc)
+    return ret
+
+
+def read_dict(collection, key, db=GAME_DB, no_id=True) -> dict:
+    """
+    Return all documents in the collection as a dictionary,
+    keyed by a specific field.
+    Optionally remove the `_id` field from each document.
+    """
+    recs = read(collection, db=db, no_id=no_id)
+    recs_as_dict = {}
+    for rec in recs:
+        recs_as_dict[rec[key]] = rec
+    return recs_as_dict
+
+
+if __name__ == "__main__":
+    connect_db()
+    print("Database connected.")
