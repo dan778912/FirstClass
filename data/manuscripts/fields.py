@@ -68,6 +68,17 @@ def get_display_name(field_name: str) -> dict:
     return display_name
 
 
+def is_field_valid(field_name: str) -> bool:
+    return field_name in FIELDS
+
+
+def add_field(field_name: str, display_name: str) -> bool:
+    if field_name in FIELDS:
+        return False  # Field already exists
+    FIELDS[field_name] = {DISPLAY_NAME: display_name}
+    return True
+
+
 def main():
     print(f'{get_fields()=}')
 
