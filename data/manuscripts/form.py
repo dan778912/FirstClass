@@ -15,6 +15,16 @@ FORM_FLDS = [
 ]
 
 
+def validate_form_fields(fields: list):
+    required_keys = {ff.FLD_NM, ff.QSTN, ff.PARAM_TYPE}
+    for field in fields:
+        if not required_keys.issubset(field):
+            raise ValueError(f"Field missing required keys: {field}")
+        
+
+validate_form_fields(FORM_FLDS)
+
+
 def get_form() -> list:
     return FORM_FLDS
 
@@ -23,7 +33,10 @@ def get_form_descr():
     """
     For Swagger!
     """
-    return ff.get_form_descr(FORM_FLDS)
+    try:
+        return ff.get_form_descr(FORM_FLDS)
+    except Exception as e:
+        raise ValueError(f"Failed to get form description: {e}")
 
 
 def get_fld_names() -> list:
