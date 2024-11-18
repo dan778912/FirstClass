@@ -59,6 +59,13 @@ def test_read(mock_read):
         assert NAME in person
 
 
+@patch('data.people.read_one', autospec=True,
+       return_value={NAME: 'Joe Schmoe'})
+def test_read_one(mock_read):
+    resp = TEST_CLIENT.get(f'{ep.PEOPLE_EP}/mock_id')
+    assert resp.status_code == OK
+
+
 def test_get_people():
     resp = TEST_CLIENT.get(ep.PEOPLE_EP)
     resp_json = resp.get_json()
