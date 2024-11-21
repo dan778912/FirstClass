@@ -35,9 +35,10 @@ def connect_db():
         else:
             print("Connecting to Mongo locally.")
             client = pm.MongoClient()
+        return client
 
 
-def insert_one(collection, doc, db=GAME_DB):
+def create(collection, doc, db=GAME_DB):
     """
     Insert a single doc into collection.
     """
@@ -57,14 +58,16 @@ def fetch_one(collection, filt, db=GAME_DB):
         return doc
 
 
-def del_one(collection, filt, db=GAME_DB):
+def delete(collection, filt, db=GAME_DB):
     """
     Find with a filter and return on the first doc found.
     """
-    client[db][collection].delete_one(filt)
+    print(f'{filt=}')
+    del_result = client[db][collection].delete_one(filt)
+    return del_result.deleted_count
 
 
-def update_doc(collection, filters, update_dict, db=GAME_DB):
+def update(collection, filters, update_dict, db=GAME_DB):
     return client[db][collection].update_one(filters, {'$set': update_dict})
 
 
