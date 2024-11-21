@@ -3,6 +3,13 @@ import re
 
 import data.roles as rls
 from data.roles import PERSON_ROLES
+import data.db_connect as dbc
+
+client = dbc.connect_db()
+print(f'{client=}')
+
+PEOPLE_COLLECT = 'people'
+MIN_USER_NAME_LEN = 2
 
 NAME = "name"
 ROLES = "roles"
@@ -84,77 +91,62 @@ def has_role(person: dict, role: str) -> bool:
 def create(name: str, affiliation: str, email: str, role: str):
     """
     Creates a new entity Person.
-    Returns new Person with fields: name, affiliation, email.
+    Returns the email used as the key.
     Args:
-        string: name, affiliation, email
+        string: name, affiliation, email, role
     Returns:
         string: email value in dictionary
     """
-    if email in TEST_PERSON_DICT:
+    if exists(email):
         raise ValueError(f"Trying to add duplicate: {email=}")
     if is_valid_person(name, affiliation, email, role=role):
         roles = []
         if role:
             roles.append(role)
-        TEST_PERSON_DICT[email] = {
-            NAME: name,
-            AFFILIATION: affiliation,
-            EMAIL: email,
-            ROLES: roles
-        }
+        person = {NAME: name, AFFILIATION: affiliation,
+                  EMAIL: email, ROLES: roles}
+        print(person)
+        dbc.create(PEOPLE_COLLECT, person)
         return email
 
 
-def update(email: str, name=None, affiliation=None, new_email=None, role=None):
+def update(name: str, affiliation: str, email: str, roles: list):
     """
-    Updates a Person's name, affiliation, or email.
-
+    Updates a Person's name, affiliation, roles, or email
     Args:
-        email (str): Current email of the person.
         name (str, optional): New name to update.
         affiliation (str, optional): New affiliation to update.
-        new_email (str, optional): New email to update.
-        role (str, optional): New role to add to roles list.
+        email (str): Current email of the person.
+        roles (list, optional): New roles to add to roles list.
 
     Returns:
-        dict: Updated person dictionary, or False if email not found.
+        string: email value in dictionary
     """
-    if email not in TEST_PERSON_DICT:
+    if not exists(email):
         raise ValueError(
             f'Trying to update person that does not exist: '
             f'{email=}'
         )
-
-    person = TEST_PERSON_DICT[email]
-
-    if name:
-        person[NAME] = name
-    if affiliation:
-        person[AFFILIATION] = affiliation
-    if role:
-        if ROLES not in person:
-            person[ROLES] = []
-        if role not in person[ROLES]:
-            person[ROLES].append(role)
-    if new_email and new_email != email:
-        if new_email in TEST_PERSON_DICT:
-            raise ValueError('Email already in use')
-        person[EMAIL] = new_email
-        TEST_PERSON_DICT[new_email] = person
-        del TEST_PERSON_DICT[email]
-
-    return person
+    if is_valid_person(name, affiliation, email, roles=roles):
+        ret = dbc.update(PEOPLE_COLLECT,
+                         {EMAIL: email},
+                         {NAME: name, AFFILIATION: affiliation,
+                          EMAIL: email, ROLES: roles})
+        print(f'{ret=}')
+        return email
 
 
-def read():
+def read() -> dict:
     """
     Reads information from Person fields and returns it.
     Args:
-        string: email
+        None
     Returns:
-        string: email value
+        dict: dictionary of users keyed by email
     """
-    return TEST_PERSON_DICT
+    people = dbc.read_dict(PEOPLE_COLLECT, EMAIL)
+    print(f'{people=}')
+    return people
 
 
 def read_one(email: str) -> dict:
@@ -162,22 +154,24 @@ def read_one(email: str) -> dict:
     Return a person record if email present in DB,
     else None.
     """
-    return TEST_PERSON_DICT.get(email)
+    return dbc.read_one(PEOPLE_COLLECT, {EMAIL: email})
+
+
+def exists(email: str) -> bool:
+    return read_one(email) is not None
 
 
 def delete(email: str):
     """
     Deletes given entity Person.
-    Returns true if successfully deleted, and false if an error occurred.
+    Returns the person deleted.
     Args:
         string: email
     Returns:
-        Bool: true if deleted, false if not.
+        Bool: DB person entry.
     """
-    if email in TEST_PERSON_DICT:
-        del TEST_PERSON_DICT[email]
-        return True
-    return False
+    print(f'{EMAIL=}, {email=}')
+    return dbc.delete(PEOPLE_COLLECT, {EMAIL: email})
 
 
 def get(role=None, affiliation=None):
