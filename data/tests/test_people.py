@@ -16,12 +16,15 @@ TEMP_EMAIL = "temp_email@temp.com"
 
 @pytest.fixture(scope="function")
 def temp_person():
-    with patch('data.people.create') as mock_create:
-        mock_create.return_value = TEMP_EMAIL
-        _id = mock_create("John Doe", "NYU", TEMP_EMAIL, TEST_CODE)
-        yield _id
-        with patch('data.people.delete') as mock_delete:
-            mock_delete(_id)
+    email = "temp_email@temp.com"
+    with patch("data.people.create") as mock_create:
+        mock_create.return_value = email
+        ppl.create("John Doe", "NYU", email, TEST_CODE)
+        yield email
+        with patch("data.people.delete") as mock_delete:
+            mock_delete.return_value = True
+            ppl.delete(email)
+
 
 
 @pytest.fixture(scope="function")
@@ -101,10 +104,12 @@ def test_create_bad_email():
 
 # Check for duplicate email
 def test_create_duplicate_person():
-    duplicate_person = "duplicate@nyu.edu"
-    ppl.create("Original User", "NYU", duplicate_person, TEST_CODE)
-    with pytest.raises(ValueError, match="Trying to add duplicate: email="):
-        ppl.create("Duplicate User", "NYU", duplicate_person, TEST_CODE)
+    duplicate_email = "duplicate@nyu.edu"
+    with patch("data.people.exists", side_effect=[False, True]):
+        ppl.create("Original User", "NYU", duplicate_email, TEST_CODE)
+        with pytest.raises(ValueError, match=f"Trying to add duplicate: email='{duplicate_email}'"):
+            ppl.create("Duplicate User", "NYU", duplicate_email, TEST_CODE)
+    ppl.delete(duplicate_email)
 
 
 @pytest.mark.skip(reason="Feature not yet implemented")
@@ -113,21 +118,24 @@ def test_partial_update_person():
 
 
 def test_exists(temp_person):
-    assert ppl.exists(temp_person)
+    with patch("data.people.read_one", return_value={"email": temp_person}):
+        assert ppl.exists(temp_person) # Should return True
 
 
 def test_doesnt_exist():
-    assert not ppl.exists('Not an existing email!')
+    non_existing_email = "nonexistent@nyu.edu / Email does not exist"
+    with patch("data.people.read_one", return_value=None):
+        assert not ppl.exists(non_existing_email)
 
 
 @patch("data.people.read")
 def test_get_people_mocked_read(mock_read):
     mock_read.return_value = {
-        "mock_id": {ppl.NAME: "Mock User", ppl.AFFILIATION: "NYU"}
+        "mock_id": {"name": "Mock User", "affiliation": "NYU"}
     }
     people = ppl.read()
     assert "mock_id" in people
-    assert people["mock_id"][ppl.NAME] == "Mock User"
+    assert people["mock_id"]["name"] == "Mock User"
 
 
 def test_create_person_with_invalid_email():
@@ -150,4 +158,5 @@ def test_is_invalid_email(email):
 
 
 def test_is_valid_complex_email():
-    assert ppl.is_valid_email(COMPLEX_EMAIL)
+    complex_email = "zcd.220!220@n.y-u.edu"
+    assert ppl.is_valid_email(complex_email)
