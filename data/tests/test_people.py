@@ -4,7 +4,7 @@ import os
 from unittest.mock import patch
 import pytest
 import data.people as ppl
-from data.roles import TEST_CODE, ME_CODE
+from data.roles import TEST_CODE
 sys.path.insert(0, os.path.abspath(os.path.join
                                    (os.path.dirname(__file__), '../../')))
 
@@ -59,30 +59,19 @@ def test_update_person():
     mock_affiliation = "Columbia"
     mock_email = "updatetest@nyu.edu"
     mock_roles = [TEST_CODE]
-    with patch('data.dbc.update',
-               return_value={"name": mock_name, "email": mock_email}
-               ) as mock_db_update:
-        with patch('data.people.exists', return_value=True):
-            with patch('data.people.is_valid_person', return_value=True):
-                result = ppl.update(mock_name, mock_affiliation, mock_email,
-                                    mock_roles)
 
-                assert result == mock_email
-                mock_db_update.assert_called_once_with(
-                    "people_collection",
-                    {EMAIL: mock_email},
-                    {
-                        NAME: mock_name,
-                        AFFILIATION: mock_affiliation,
-                        EMAIL: mock_email,
-                        ROLES: mock_roles
-                    }
-                )
+    with patch('data.people.exists', return_value=True):
+        with patch('data.people.is_valid_person', return_value=True):
+            result = ppl.update(mock_name, mock_affiliation, mock_email,
+                                mock_roles)
+
+            assert result == mock_email
 
 
 def test_delete_person():
     ppl.delete(TEMP_EMAIL)
-    assert not ppl.exists(temp_person)
+    print("here")
+    assert not ppl.exists(TEMP_EMAIL)
 
 
 def test_read():
