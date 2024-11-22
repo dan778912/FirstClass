@@ -117,5 +117,5 @@ def read_dict(collection, key, db=GAME_DB, no_id=True) -> dict:
 
 
 if __name__ == "__main__":
-    connect_db()
+    print(connect_db())
     print("Database connected.")

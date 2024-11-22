@@ -66,14 +66,30 @@ def test_read_one(mock_read):
     assert resp.status_code == OK
 
 
-def test_get_people():
+@patch('data.people.read', autospec=True)
+def test_get_people(mock_read):
+    fake_people_data = {
+        "12345": {"name": "Test User", "email": "testuser@example.com"},
+        "67890": {"name": "Another User", "email": "anotheruser@example.com"}
+    }
+
+    mock_read.return_value = fake_people_data
     resp = TEST_CLIENT.get(ep.PEOPLE_EP)
     resp_json = resp.get_json()
-    print(resp_json)
     for _id, person in resp_json.items():
         assert isinstance(_id, str)
         assert len(_id) > 0
-        assert NAME in person
+        assert "name" in person
+        assert "email" in person
+
+    print(resp_json)
+    # resp = TEST_CLIENT.get(ep.PEOPLE_EP)
+    # resp_json = resp.get_json()
+    # for _id, person in resp_json.items():
+    #     assert isinstance(_id, str)
+    #     assert len(_id) > 0
+    #     print(resp_json.items())
+    #     assert NAME in person
 
 
 @pytest.mark.skip(reason="Not implemented test_get_text yet")

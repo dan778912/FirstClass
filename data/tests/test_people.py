@@ -4,7 +4,7 @@ import os
 from unittest.mock import patch
 import pytest
 import data.people as ppl
-from data.roles import TEST_CODE
+from data.roles import TEST_CODE, ME_CODE
 sys.path.insert(0, os.path.abspath(os.path.join
                                    (os.path.dirname(__file__), '../../')))
 
@@ -47,33 +47,42 @@ def test_create_person():
     This test ensures the `create_person` function works
     by adding an email to the people dictionary.
     """
-    people = ppl.read()
-    # Check that ADD_EMAIL is not already present
-    assert ADD_EMAIL not in people
-
+    assert not ppl.exists(ADD_EMAIL)
     # Create the person
     ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE)
-    people = ppl.read()
-    assert ADD_EMAIL in people
+    assert ppl.exists(ADD_EMAIL)
+    ppl.delete(ADD_EMAIL)
 
 
 def test_update_person():
-    ppl.create("Update Test", "NYU", "updatetest@nyu.edu", TEST_CODE)
-    updated_person = ppl.update("updatetest@nyu.edu",
-                                name="Updated Name",
-                                new_email="newemail@nyu.edu")
-    people = ppl.get()
+    mock_name = "Updated Name"
+    mock_affiliation = "Columbia"
+    mock_email = "updatetest@nyu.edu"
+    mock_roles = [TEST_CODE]
+    with patch('data.dbc.update',
+               return_value={"name": mock_name, "email": mock_email}
+               ) as mock_db_update:
+        with patch('data.people.exists', return_value=True):
+            with patch('data.people.is_valid_person', return_value=True):
+                result = ppl.update(mock_name, mock_affiliation, mock_email,
+                                    mock_roles)
 
-    assert updated_person["name"] == "Updated Name"
-    assert "updatetest@nyu.edu" not in people
-    assert "newemail@nyu.edu" in people
-    assert updated_person["email"] == "newemail@nyu.edu"
+                assert result == mock_email
+                mock_db_update.assert_called_once_with(
+                    "people_collection",
+                    {EMAIL: mock_email},
+                    {
+                        NAME: mock_name,
+                        AFFILIATION: mock_affiliation,
+                        EMAIL: mock_email,
+                        ROLES: mock_roles
+                    }
+                )
 
 
 def test_delete_person():
-    with patch("data.people.delete") as mock_delete:
-        ppl.delete(TEMP_EMAIL)
-        mock_delete.assert_called_once_with(TEMP_EMAIL)
+    ppl.delete(TEMP_EMAIL)
+    assert not ppl.exists(temp_person)
 
 
 def test_read():
@@ -112,6 +121,14 @@ def test_create_duplicate_person():
 @pytest.mark.skip(reason="Feature not yet implemented")
 def test_partial_update_person():
     pass
+
+
+def test_exists(temp_person):
+    assert ppl.exists(temp_person)
+
+
+def test_doesnt_exist():
+    assert not ppl.exists('Not an existing email!')
 
 
 @patch("data.people.read")
