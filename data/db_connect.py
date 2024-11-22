@@ -112,6 +112,8 @@ def read_dict(collection, key, db=GAME_DB, no_id=True) -> dict:
     recs = read(collection, db=db, no_id=no_id)
     recs_as_dict = {}
     for rec in recs:
+        if no_id and MONGO_ID in rec:
+            del rec[MONGO_ID]
         recs_as_dict[rec[key]] = rec
     return recs_as_dict
 

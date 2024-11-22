@@ -1,10 +1,11 @@
 # test_people.py
 import sys
 import os
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import pytest
 import data.people as ppl
 from data.roles import TEST_CODE
+import data.db_connect as db
 sys.path.insert(0, os.path.abspath(os.path.join
                                    (os.path.dirname(__file__), '../../')))
 
@@ -12,6 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 ADD_EMAIL = "callahan@nyu.edu"
 TEMP_EMAIL = "temp_email@temp.com"
+TEST_DOC = {"name": "Professor Callahan", "affiliation": "NYU", "email": "callahan@nyu.edu", "roles": ["AU"]}
 
 
 @pytest.fixture(scope="function")
@@ -45,16 +47,28 @@ def test_get_people():
             assert ppl.NAME in person
 
 
-def test_create_person():
-    """
-    This test ensures the `create_person` function works
-    by adding an email to the people dictionary.
-    """
+@patch("data.people.dbc.client", new_callable=MagicMock)
+def test_create_person(mock_client):
+    db.client = mock_client
+    mock_collection = mock_client["gamesDB"]["people"]
+    
+    mock_collection.find.return_value = []
+
     assert not ppl.exists(ADD_EMAIL)
-    # Create the person
+
+    mock_collection.insert_one.return_value.inserted_id = "123"
     ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE)
+
+    mock_collection.insert_one.assert_called_once_with({
+        "name": "Professor Callahan",
+        "affiliation": "NYU",
+        "email": ADD_EMAIL,
+        "roles": [TEST_CODE],
+    })
+
+    mock_collection.find.return_value = [{"_id": "123", "email": ADD_EMAIL}]
     assert ppl.exists(ADD_EMAIL)
-    ppl.delete(ADD_EMAIL)
+
 
 
 def test_update_person():
