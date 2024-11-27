@@ -28,6 +28,11 @@ def temp_person():
             ppl.delete(email)
 
 
+def test_get_mh_fields():
+    fields = ppl.get_mh_fields()
+    assert isinstance(fields, list)
+    assert len(fields) > 0
+
 
 @pytest.fixture(scope="function")
 def duplicate_person():
@@ -174,3 +179,8 @@ def test_is_invalid_email(email):
 def test_is_valid_complex_email():
     complex_email = "zcd.220!220@n.y-u.edu"
     assert ppl.is_valid_email(complex_email)
+
+
+def test_get_masthead():
+    mh = ppl.get_masthead()
+    assert isinstance(mh, dict)
