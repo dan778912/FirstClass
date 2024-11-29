@@ -38,16 +38,6 @@ def duplicate_person():
     ppl.delete(email)
 
 
-def test_get_people():
-    with patch("data.people.read", return_value={"mock_id": {ppl.NAME: "Mock User"}}):
-        people = ppl.get()
-        assert isinstance(people, dict)
-        assert len(people) > 0
-        for _id, person in people.items():
-            assert isinstance(_id, str)
-            assert ppl.NAME in person
-
-
 @patch("data.people.dbc.client", new_callable=MagicMock)
 def test_create_person(mock_client):
     db.client = mock_client

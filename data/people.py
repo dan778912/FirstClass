@@ -17,32 +17,6 @@ ROLE = "role"
 AFFILIATION = "affiliation"
 EMAIL = "email"
 
-TEST_EMAIL = "aim9061@nyu.edu"
-PROF_TEST_EMAIL = "ejc369@nyu.edu"
-DEL_EMAIL = 'delete@nyu.edu'
-
-
-TEST_PERSON_DICT = {
-    TEST_EMAIL: {
-        NAME: "Alex Martin",
-        ROLES: [],
-        AFFILIATION: "NYU",
-        EMAIL: TEST_EMAIL,
-    },
-    PROF_TEST_EMAIL: {
-        NAME: "Eugene Callahan",
-        ROLES: [],
-        AFFILIATION: "NYU",
-        EMAIL: PROF_TEST_EMAIL,
-    },
-    DEL_EMAIL: {
-        NAME: 'Another Person',
-        ROLES: [],
-        AFFILIATION: 'NYU',
-        EMAIL: DEL_EMAIL,
-    }
-}
-
 
 LOCAL_CHARS = r'[A-Za-z0-9.!#$%&\'*+-/=?^_`{|}~]+'
 DOMAIN_CHARS = r'[A-Za-z0-9.-]+'
@@ -172,25 +146,3 @@ def delete(email: str):
     """
     print(f'{EMAIL=}, {email=}')
     return dbc.delete(PEOPLE_COLLECT, {EMAIL: email})
-
-
-def get(role=None, affiliation=None):
-    """
-    Takes in no arguments but returns a dictionary of users in which
-    each user email must be the key for another dictionary.
-    Args:
-        None
-    Returns:
-        Dict: dictionary of users on user email
-    """
-    if not role and not affiliation:
-        return TEST_PERSON_DICT
-
-    filtered_dict = {}
-    for email, person in TEST_PERSON_DICT.items():
-        if role and role in person.get(ROLES, []):
-            filtered_dict[email] = person
-        elif affiliation and person.get(AFFILIATION) == affiliation:
-            filtered_dict[email] = person
-
-    return filtered_dict
