@@ -14,6 +14,7 @@ def gen_random_not_valid_str() -> str:
     big_int = random.randint(0, BIG_NUM)
     big_int += BIG_NUM
     bad_str = str(big_int)
+    return bad_str
 
 
 def test_is_valid_state():

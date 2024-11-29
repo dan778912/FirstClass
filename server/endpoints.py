@@ -4,7 +4,7 @@ from flask_restx import Resource, Api, fields
 from flask_cors import CORS
 import werkzeug.exceptions as wz
 import data.people as ppl
-import data.text as text
+import data.text as txt
 import data.masthead as mh
 import sys
 import os
@@ -82,28 +82,72 @@ class JournalText(Resource):
         """
         Retrieve journal text
         """
-        return text.read()
+        return txt.read()
+
+
+TEXT_FLDS = api.model('AddNewTextEntry', {
+    # key: str, title: str, text: str
+    txt.KEY: fields.String,
+    txt.TITLE: fields.String,
+    txt.TEXT: fields.String
+})
 
 
 @api.route(f'{TEXT_EP}/<key>')
 class Text(Resource):
+    """
+    This class handles CRUD operations for text.
+    """
     def get(self, key):
         """Returns specific page dictionary from given key."""
-        page = text.read_one(key)
+        page = txt.read_one(key)
         if page:
             return page
         else:
-            raise (f"No such record: {key}")
+            raise wz.NotFound(f"No such record: {key}")
 
     def delete(self, key):
         """
         Deletes page from text dictionary.
         """
-        ret = text.delete(key)
+        ret = txt.delete(key)
         if ret is not False:
             return {'Deleted': ret}
         else:
             raise wz.NotFound(f'No such key: {key}')
+
+    @api.expect(TEXT_FLDS)
+    def post(self):
+        """Create a new text entry."""
+        data = request.json
+        try:
+            key = data.get(txt.KEY)
+            title = data.get(txt.TITLE)
+            text = data.get(txt.TEXT)
+            ret = txt.create(key, title, text)
+            return {
+                        MESSAGE: 'Text added!',
+                        RETURN: ret,
+                    }
+        except Exception as err:
+            raise wz.NotAcceptable(f'Could not add text: '
+                                   f'{err=}')
+
+    @api.expect(TEXT_FLDS)
+    def put(self, key):
+        """Update an existing text entry."""
+        data = request.json
+        try:
+            title = data.get(txt.TITLE)
+            text = data.get(txt.TEXT)
+            ret = txt.update(key, title, text)
+            return {
+                        MESSAGE: 'Text updated!',
+                        RETURN: ret,
+                    }
+        except Exception as err:
+            raise wz.NotAcceptable(f'Could not update text: '
+                                   f'{err=}')
 
 
 @api.route(PEOPLE_EP)
