@@ -6,6 +6,7 @@ import pytest
 import data.people as ppl
 from data.roles import TEST_CODE
 import data.db_connect as db
+from data.roles import TEST_CODE as TEST_ROLE_CODE
 sys.path.insert(0, os.path.abspath(os.path.join
                                    (os.path.dirname(__file__), '../../')))
 
@@ -18,16 +19,14 @@ TEST_DOC = {"name": "Professor Callahan", "affiliation": "NYU",
             "email": "callahan@nyu.edu", "roles": ["AU"]}
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def temp_person():
-    email = "temp_email@temp.com"
-    with patch("data.people.create") as mock_create:
-        mock_create.return_value = email
-        ppl.create("John Doe", "NYU", email, TEST_CODE)
-        yield email
-        with patch("data.people.delete") as mock_delete:
-            mock_delete.return_value = True
-            ppl.delete(email)
+    email = ppl.create('Joe Smith', 'NYU', TEMP_EMAIL, TEST_ROLE_CODE)
+    yield email
+    try:
+        ppl.delete(email)
+    except:
+        print('Person already deleted.')
 
 
 @pytest.fixture(scope="function")
