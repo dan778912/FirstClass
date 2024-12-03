@@ -146,3 +146,17 @@ def delete(email: str):
     """
     print(f'{EMAIL=}, {email=}')
     return dbc.delete(PEOPLE_COLLECT, {EMAIL: email})
+
+
+MH_FIELDS = [NAME, AFFILIATION]
+
+
+def get_mh_fields(journal_code=None) -> list:
+    return MH_FIELDS
+
+
+def create_mh_rec(person: dict) -> dict:
+    mh_rec = {}
+    for field in get_mh_fields():
+        mh_rec[field] = person.get(field, '')
+    return mh_rec

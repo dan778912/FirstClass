@@ -29,6 +29,12 @@ def temp_person():
         print('Person already deleted.')
 
 
+def test_get_mh_fields():
+    flds = ppl.get_mh_fields()
+    assert isinstance(flds, list)
+    assert len(flds) > 0
+
+
 @pytest.fixture(scope="function")
 def duplicate_person():
     email = "duplicate@nyu.edu"
