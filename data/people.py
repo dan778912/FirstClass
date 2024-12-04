@@ -160,3 +160,21 @@ def create_mh_rec(person: dict) -> dict:
     for field in get_mh_fields():
         mh_rec[field] = person.get(field, '')
     return mh_rec
+
+
+def get_masthead() -> dict:
+    masthead = {}
+    mh_roles = rls.get_masthead_roles()
+    for mh_role, text in mh_roles.items():
+        people_w_role = []
+        people = read()
+        for _id, person in people.items():
+            if has_role(person, mh_role):
+                rec = create_mh_rec(person)
+                people_w_role.append(rec)
+        masthead[text] = people_w_role
+    return masthead
+
+
+def main():
+    print(get_masthead())
