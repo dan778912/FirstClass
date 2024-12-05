@@ -90,31 +90,29 @@ STATE_TABLE = {
         },
     },
     REJECTED: {
-        # Define any possible transitions here, if applicable
+        # Define possible next steps, like resubmission
     },
 }
 
 
-def handle_action(curr_state, action, manuscript=None) -> str:
-    if not is_valid_state(curr_state):
+def get_valid_actions_by_state(state: str):
+    valid_actions = STATE_TABLE[state].keys()
+    print(f'{valid_actions=}')
+    return valid_actions
+
+
+def handle_action(curr_state, action, manuscript) -> str:
+    if curr_state not in STATE_TABLE:
         raise ValueError(f'Invalid state: {curr_state}')
-    if not is_valid_action(action):
+    if action not in STATE_TABLE[curr_state]:
         raise ValueError(f'Invalid action: {action}')
+    return STATE_TABLE[curr_state][action][FUNC](manuscript)
 
-    # Check if the action is valid for the current state
-    if curr_state not in STATE_TABLE or action not in STATE_TABLE[curr_state]:
-        raise AssertionError(
-            f"Invalid state transition: {curr_state} -> {action}"
-        )
 
-    # Perform the action and determine the new state
-    transition = STATE_TABLE[curr_state][action]
-    new_state = transition[FUNC](manuscript)
-    
-    # Validate the new state
-    if not is_valid_state(new_state):
-        raise AssertionError(
-            f"Invalid state transition: {curr_state} -> {action} -> {new_state}"
-        )
+def main():
+    print(handle_action(SUBMITTED, ASSIGN_REF, SAMPLE_MANUSCRIPT))
+    print(handle_action(SUBMITTED, REJECT, SAMPLE_MANUSCRIPT))
 
-    return new_state
+
+if __name__ == '__main__':
+    main()
