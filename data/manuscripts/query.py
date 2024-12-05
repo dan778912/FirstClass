@@ -1,9 +1,14 @@
+import data.manuscripts.fields as fields
+
+
 # states:
+AUTHOR_REV = 'AUR'
 COPY_EDIT = 'CED'
 IN_REF_REV = 'REV'
 REJECTED = 'REJ'
 SUBMITTED = 'SUB'
 TEST_STATE = SUBMITTED
+
 
 VALID_STATES = [
     COPY_EDIT,
@@ -11,6 +16,13 @@ VALID_STATES = [
     REJECTED,
     SUBMITTED,
 ]
+
+
+SAMPLE_MANUSCRIPT = {
+    fields.TITLE: 'Short module import names in Python',
+    fields.AUTHOR: 'Zoe Dauphinee',
+    fields.REFEREES: []
+}
 
 
 def get_states() -> list:
@@ -29,6 +41,7 @@ REJECT = 'REJ'
 # for testing:
 TEST_ACTION = ACCEPT
 
+
 VALID_ACTIONS = [
     ACCEPT,
     ASSIGN_REF,
@@ -43,6 +56,46 @@ def get_actions() -> list:
 
 def is_valid_action(action: str) -> bool:
     return action in VALID_ACTIONS
+
+
+def sub_assign_ref(manuscript: dict) -> str:
+    return IN_REF_REV
+
+
+FUNC = 'f'
+
+
+STATE_TABLE = {
+    SUBMITTED: {
+        ASSIGN_REF: {
+            FUNC: lambda m: IN_REF_REV,
+        },
+        REJECT: {
+            FUNC: lambda m: REJECTED,
+        },
+    },
+    IN_REF_REV: {
+        ACCEPT: {
+            FUNC: lambda m: AUTHOR_REV,
+        },
+        REJECT: {
+            FUNC: lambda m: REJECTED,
+        },
+    },
+    COPY_EDIT: {
+        DONE: {
+            FUNC: lambda m: AUTHOR_REV,
+        },
+    },
+    AUTHOR_REV: {
+        DONE: {
+            FUNC: lambda m: SUBMITTED,
+        },
+    },
+    REJECTED: {
+        # Define any possible transition if applicable, e.g., resubmission
+    },
+}
 
 
 def handle_action(curr_state, action) -> str:
