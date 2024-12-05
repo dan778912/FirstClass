@@ -10,9 +10,10 @@ ABSTRACT = 'abstract'
 HISTORY = 'history'
 EDITOR = 'editor'
 
+# Attribute Keys
 DISPLAY_NAME = 'display_name'
 
-# Test field names
+# Test Field Names
 TEST_FIELD_TITLE_DISPLAY_NAME = 'Title'
 TEST_FIELD_AUTHOR_DISPLAY_NAME = 'Author'
 TEST_FIELD_AUTHOR_EMAIL_DISPLAY_NAME = 'Author Email'
@@ -99,6 +100,32 @@ def remove_field(field_name: str) -> bool:
     return True
 
 
+# Functions derived from professor's code
+def get_flds() -> dict:
+    """
+    Return the FIELDS dictionary.
+    Added for compatibility with the professor's code.
+    """
+    return FIELDS
+
+
+def get_fld_names() -> list:
+    """
+    Return field names as a list.
+    Added for compatibility with the professor's code.
+    """
+    return list(FIELDS.keys())
+
+
+def get_disp_name(fld_nm: str) -> str:
+    """
+    Return the display name for a given field name.
+    Added for compatibility with the professor's code.
+    """
+    fld = FIELDS.get(fld_nm, {})
+    return fld.get(DISPLAY_NAME, '')
+
+
 def main():
     """
     Main function for testing.
@@ -119,6 +146,11 @@ def main():
     # Test removing a field
     print(f'Removing "new_field": {remove_field("new_field")}')
     print(f'Fields after removing: {get_fields()}')
+
+    # Test professor's functions
+    print(f'Fields (Professor): {get_flds()}')
+    print(f'Field Names (Professor): {get_fld_names()}')
+    print(f'Display Name for Title (Professor): {get_disp_name(TITLE)}')
 
 
 if __name__ == '__main__':
