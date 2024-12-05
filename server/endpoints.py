@@ -183,7 +183,7 @@ class Person(Resource):
     @api.response(HTTPStatus.NOT_FOUND, 'No such person.')
     def delete(self, _id):
         ret = ppl.delete(_id)
-        if ret is not False:
+        if ret != 0:
             return {'Deleted': ret}
         else:
             raise wz.NotFound(f'No such person: {_id}')

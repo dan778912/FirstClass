@@ -196,24 +196,27 @@ def test_get_person(existing_person_id):
         resp_json = resp.get_json()
         assert "name" in resp_json
 
-@pytest.mark.skip(reason="Not working")
+
 def test_del_person():
     person_id = "delete@nyu.edu"
 
-    # Attempt to delete the person (assuming it exists)
-    resp = TEST_CLIENT.delete(f'{ep.PEOPLE_EP}/{person_id}')
+    with patch('data.people.delete') as mock_delete:
+        # Using mock_delete.side_effec t to simulate different behavior
+        mock_delete.side_effect = [True, False]
+        # Attempt to delete the person (assuming it exists)
+        resp = TEST_CLIENT.delete(f'{ep.PEOPLE_EP}/{person_id}')
 
-    # Check if the person was successfully deleted or not found
-    if resp.status_code == OK:
-        assert resp.status_code == OK
-    elif resp.status_code == NOT_FOUND:
-        pytest.skip(f"Person with ID {person_id} does not exist.")
-    else:
-        pytest.fail(f"Unexpected status code {resp.status_code}")
+        # Check if the person was successfully deleted or not found
+        if resp.status_code == OK:
+            assert resp.status_code == OK
+        elif resp.status_code == NOT_FOUND:
+            pytest.skip(f"Person with ID {person_id} does not exist.")
+        else:
+            pytest.fail(f"Unexpected status code {resp.status_code}")
 
-    # Attempting to delete again should return 404 NOT FOUND
-    double_delete_resp = TEST_CLIENT.delete(f'{ep.PEOPLE_EP}/{person_id}')
-    assert double_delete_resp.status_code == NOT_FOUND
+        # Attempting to delete again should return 404 NOT FOUND
+        double_delete_resp = TEST_CLIENT.delete(f'{ep.PEOPLE_EP}/{person_id}')
+        assert double_delete_resp.status_code == NOT_FOUND
 
 
 def test_get_masthead():
