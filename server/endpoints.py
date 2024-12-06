@@ -117,11 +117,10 @@ class Text(Resource):
             raise wz.NotFound(f'No such key: {key}')
 
     @api.expect(TEXT_FLDS)
-    def post(self):
+    def post(self, key):
         """Create a new text entry."""
         data = request.json
         try:
-            key = data.get(txt.KEY)
             title = data.get(txt.TITLE)
             text = data.get(txt.TEXT)
             ret = txt.create(key, title, text)
@@ -130,6 +129,7 @@ class Text(Resource):
                         RETURN: ret,
                     }
         except Exception as err:
+            print("excepted")
             raise wz.NotAcceptable(f'Could not add text: '
                                    f'{err=}')
 

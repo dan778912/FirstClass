@@ -125,9 +125,21 @@ def test_del_text():
     assert double_delete_resp.status_code == NOT_FOUND
 
 
-@pytest.mark.skip(reason="Not implemented test_create_text yet")
 def test_create_text(valid_text_data):
-    pass
+    create_resp = TEST_CLIENT.post(f'{ep.TEXT_EP}/{valid_text_data["key"]}', json=valid_text_data)
+    assert create_resp.status_code == OK
+    create_resp_json = create_resp.get_json()
+    assert create_resp_json[ep.MESSAGE] == "Text added!"
+
+    text_key = valid_text_data["key"]
+    get_resp = TEST_CLIENT.get(f'{ep.TEXT_EP}/{text_key}')
+    assert get_resp.status_code == OK
+    get_resp_json = get_resp.get_json()
+
+    assert get_resp_json["title"] == valid_text_data["title"]
+    assert get_resp_json["text"] == valid_text_data["text"]
+
+    TEST_CLIENT.delete(f'{ep.TEXT_EP}/{text_key}')
 
 
 def test_update_text(valid_text_data):
