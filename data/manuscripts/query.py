@@ -1,41 +1,32 @@
-import data.manuscripts.fields as fields
+"""
+This module handles manuscript state management and transitions.
+It defines valid states, actions, and the rules for transitioning between states.
+"""
+import data.manuscripts.fields as flds
 
-# States
-AUTHOR_REV = 'AUR'
-COPY_EDIT = 'CED'
-IN_REF_REV = 'REV'
-REJECTED = 'REJ'
-SUBMITTED = 'SUB'
+# Manuscript States
+AUTHOR_REV = 'AUR'  # Author Revision
+COPY_EDIT = 'CED'   # Copy Editing
+IN_REF_REV = 'REV'  # In Referee Review
+REJECTED = 'REJ'    # Rejected
+SUBMITTED = 'SUB'   # Submitted
+
 TEST_STATE = SUBMITTED
 
 VALID_STATES = [
+    AUTHOR_REV,
     COPY_EDIT,
     IN_REF_REV,
     REJECTED,
     SUBMITTED,
-    AUTHOR_REV,
 ]
 
-SAMPLE_MANUSCRIPT = {
-    fields.TITLE: 'Short module import names in Python',
-    fields.AUTHOR: 'Zoe Dauphinee',
-    fields.REFEREES: []
-}
+# Manuscript Actions
+ACCEPT = 'ACC'      # Accept
+ASSIGN_REF = 'ARF'  # Assign Referee
+DONE = 'DON'        # Done
+REJECT = 'REJ'      # Reject
 
-
-def get_states() -> list:
-    """Return the list of valid states."""
-    return VALID_STATES
-
-def is_valid_state(state: str) -> bool:
-    """Check if a state is valid."""
-    return state in VALID_STATES
-
-# Actions
-ACCEPT = 'ACC'
-ASSIGN_REF = 'ARF'
-DONE = 'DON'
-REJECT = 'REJ'
 TEST_ACTION = ACCEPT
 
 VALID_ACTIONS = [
@@ -45,23 +36,76 @@ VALID_ACTIONS = [
     REJECT,
 ]
 
+# Sample manuscript for testing
+SAMPLE_MANUSCRIPT = {
+    flds.TITLE: 'Short module import names in Python',
+    flds.AUTHOR: 'Eugene Callahan',
+    flds.REFEREES: [],
+}
+
+def get_states() -> list:
+    """
+    Returns the list of valid manuscript states.
+    
+    Returns:
+        list: All valid manuscript states
+    """
+    return VALID_STATES
+
+
+def is_valid_state(state: str) -> bool:
+    """
+    Checks if a given state is valid.
+    
+    Args:
+        state (str): State to validate
+        
+    Returns:
+        bool: True if state is valid, False otherwise
+    """
+    return state in VALID_STATES
+
+
 def get_actions() -> list:
-    """Return the list of valid actions."""
+    """
+    Returns the list of valid actions.
+    
+    Returns:
+        list: All valid actions
+    """
     return VALID_ACTIONS
 
+
 def is_valid_action(action: str) -> bool:
-    """Check if an action is valid."""
+    """
+    Checks if a given action is valid.
+    
+    Args:
+        action (str): Action to validate
+        
+    Returns:
+        bool: True if action is valid, False otherwise
+    """
     return action in VALID_ACTIONS
 
-def get_valid_actions_by_state(state: str) -> list:
-    if state not in STATE_TABLE:
-        return []
-    return list(STATE_TABLE[state].keys())
+
+def sub_assign_ref(manu: dict) -> str:
+    """
+    Handles the state transition when assigning a referee.
+    
+    Args:
+        manu (dict): Manuscript data
+        
+    Returns:
+        str: New state after referee assignment
+    """
+    return IN_REF_REV
 
 
-# State Table and Transitions
+# State transition function identifier
 FUNC = 'f'
 
+# State transition table defining valid actions and their resulting states
 STATE_TABLE = {
     SUBMITTED: {
         ASSIGN_REF: {
@@ -71,47 +115,58 @@ STATE_TABLE = {
             FUNC: lambda m: REJECTED,
         },
     },
-    IN_REF_REV: {
-        ACCEPT: {
-            FUNC: lambda m: COPY_EDIT,
-        },
-        REJECT: {
-            FUNC: lambda m: REJECTED,
-        },
-    },
-    COPY_EDIT: {  # Ensure this transition exists
+    IN_REF_REV: {},
+    COPY_EDIT: {
         DONE: {
             FUNC: lambda m: AUTHOR_REV,
         },
     },
-    AUTHOR_REV: {
-        DONE: {
-            FUNC: lambda m: SUBMITTED,
-        },
-    },
-    REJECTED: {
-        # Define possible next steps, like resubmission
-    },
+    AUTHOR_REV: {},
+    REJECTED: {},
 }
 
 
-def get_valid_actions_by_state(state: str):
+def get_valid_actions_by_state(state: str) -> set:
+    """
+    Gets all valid actions for a given state.
+    
+    Args:
+        state (str): Current manuscript state
+        
+    Returns:
+        set: Valid actions for the given state
+    """
     valid_actions = STATE_TABLE[state].keys()
     print(f'{valid_actions=}')
     return valid_actions
 
 
-def handle_action(curr_state, action, manuscript) -> str:
+def handle_action(curr_state: str, action: str, manuscript: dict) -> str:
+    """
+    Processes a state transition based on the current state and action.
+    
+    Args:
+        curr_state (str): Current manuscript state
+        action (str): Action to perform
+        manuscript (dict): Manuscript data
+        
+    Returns:
+        str: New state after action is performed
+        
+    Raises:
+        ValueError: If state or action is invalid
+    """
     if curr_state not in STATE_TABLE:
-        raise ValueError(f'Invalid state: {curr_state}')
+        raise ValueError(f'Bad state: {curr_state}')
     if action not in STATE_TABLE[curr_state]:
-        raise ValueError(f'Invalid action: {action}')
+        raise ValueError(f'{action} not available in {curr_state}')
     return STATE_TABLE[curr_state][action][FUNC](manuscript)
 
 
 def main():
-    print(handle_action(SUBMITTED, ASSIGN_REF, SAMPLE_MANUSCRIPT))
-    print(handle_action(SUBMITTED, REJECT, SAMPLE_MANUSCRIPT))
+    """Test the state transition functionality."""
+    print(handle_action(SUBMITTED, ASSIGN_REF, SAMPLE_MANU))
+    print(handle_action(SUBMITTED, REJECT, SAMPLE_MANU))
 
 
 if __name__ == '__main__':
