@@ -111,6 +111,26 @@ def assign_ref(manuscript: dict, ref: str, extra=None) -> str:
     return IN_REF_REV
 
 
+def delete_ref(manuscript: dict, ref: str) -> str:
+    """
+    Handles the state transition when deleting a referee.
+
+    Args:
+        manuscript (dict): Manuscript data
+        ref (str): Referee deleted from the manuscript 
+
+    Returns:
+        str: New state after referee deletion 
+             (In Referee Review if more refs, otherwise Submitted)
+    """
+    if len(manuscript[flds.REFEREES]) > 0:
+        manuscript[flds.REFEREES].remove(ref)
+    if len(manuscript[flds.REFEREES]) > 0:
+        return IN_REF_REV
+    else:
+        return SUBMITTED
+
+
 # State transition function identifier
 FUNC = 'f'
 
