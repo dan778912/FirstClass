@@ -30,7 +30,7 @@ def test_remote_connect(mock_client):
     with patch.dict("os.environ", {"CLOUD_MONGO": "1", "GAME_MONGO_PW": "password"}):
         client = db.connect_db()
         mock_client.assert_called_once_with(
-            "mongodb+srv://gcallah:password@koukoumongo1.yud9b.mongodb.net/?retryWrites=true&w=majority"
+            'mongodb+srv://zcd:swefall24@swe24.8te4n.mongodb.net/test?retryWrites=true&w=majority'
         )
         assert client is not None
 
