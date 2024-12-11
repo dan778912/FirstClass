@@ -10,6 +10,7 @@ COPY_EDIT = 'CED'   # Copy Editing
 IN_REF_REV = 'REV'  # In Referee Review
 REJECTED = 'REJ'    # Rejected
 SUBMITTED = 'SUB'   # Submitted
+WITHDRAWN = 'WIT'   # Withdrawn
 
 TEST_STATE = SUBMITTED
 
@@ -19,21 +20,26 @@ VALID_STATES = [
     IN_REF_REV,
     REJECTED,
     SUBMITTED,
+    WITHDRAWN
 ]
 
 # Manuscript Actions
 ACCEPT = 'ACC'      # Accept
 ASSIGN_REF = 'ARF'  # Assign Referee
+DELETE_REF = 'DRF'  # Delete Referee
 DONE = 'DON'        # Done
 REJECT = 'REJ'      # Reject
+WITHDRAW = 'WIT'   # Withdraw
 
 TEST_ACTION = ACCEPT
 
 VALID_ACTIONS = [
     ACCEPT,
     ASSIGN_REF,
+    DELETE_REF,
     DONE,
     REJECT,
+    WITHDRAW
 ]
 
 # Sample manuscript for testing
@@ -89,16 +95,19 @@ def is_valid_action(action: str) -> bool:
     return action in VALID_ACTIONS
 
 
-def sub_assign_ref(manu: dict) -> str:
+def assign_ref(manuscript: dict, ref: str, extra=None) -> str:
     """
     Handles the state transition when assigning a referee.
     
     Args:
-        manu (dict): Manuscript data
+        manuscript (dict): Manuscript data
+        ref (str): New referee assigned to the manuscript
         
     Returns:
-        str: New state after referee assignment
+        str: New state after referee assignment (In Referee Review)
     """
+    print(extra)
+    manuscript[flds.REFEREES].append(ref)
     return IN_REF_REV
 
 
@@ -123,6 +132,7 @@ STATE_TABLE = {
     },
     AUTHOR_REV: {},
     REJECTED: {},
+    WITHDRAWN: {},
 }
 
 
@@ -165,8 +175,8 @@ def handle_action(curr_state: str, action: str, manuscript: dict) -> str:
 
 def main():
     """Test the state transition functionality."""
-    print(handle_action(SUBMITTED, ASSIGN_REF, SAMPLE_MANU))
-    print(handle_action(SUBMITTED, REJECT, SAMPLE_MANU))
+    print(handle_action(SUBMITTED, ASSIGN_REF, SAMPLE_MANUSCRIPT))
+    print(handle_action(SUBMITTED, REJECT, SAMPLE_MANUSCRIPT))
 
 
 if __name__ == '__main__':
