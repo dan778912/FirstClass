@@ -24,12 +24,12 @@ def connect_db():
     if client is None:  # not connected yet!
         print("Setting client because it is None.")
         if os.environ.get("CLOUD_MONGO", LOCAL) == CLOUD:
-            # username = os.environ.get("GAME_MONGO_USER")
-            username = 'zcd'
-            # password = os.environ.get("GAME_MONGO_PW")
-            password = 'swefall24'
-            # cluster_url = os.environ.get("GAME_MONGO_URL")
-            cluster_url = 'swe24.8te4n.mongodb.net'
+            username = os.environ.get("GAME_MONGO_USER")
+            # username = 'zcd'
+            password = os.environ.get("GAME_MONGO_PW")
+            # password = 'swefall24'
+            cluster_url = os.environ.get("GAME_MONGO_URL")
+            # cluster_url = 'swe24.8te4n.mongodb.net'
             if not username or not password or not cluster_url:
                 raise ValueError('You must set your credentials '
                                  + 'to use Mongo in the cloud.')
@@ -40,7 +40,13 @@ def connect_db():
         else:
             print("Connecting to Mongo locally.")
             client = pm.MongoClient()
-        return client
+        try:
+            client.admin.command('ping')
+            print("Pinged your deployment. You successfully connected!")
+            return client
+        except Exception as e:
+            print(e)
+        return None
 
 
 def convert_mongo_id(doc: dict):

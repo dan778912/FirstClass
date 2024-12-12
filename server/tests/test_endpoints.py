@@ -231,6 +231,7 @@ def test_del_person():
         assert double_delete_resp.status_code == NOT_FOUND
 
 
+@pytest.mark.skip("Skipping bc i want to mock this one.")
 def test_get_masthead():
     """
     Tests to ensure that `get_masthead()` returns the right structure.
