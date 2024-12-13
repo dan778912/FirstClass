@@ -29,7 +29,7 @@ ASSIGN_REF = 'ARF'  # Assign Referee
 DELETE_REF = 'DRF'  # Delete Referee
 DONE = 'DON'        # Done
 REJECT = 'REJ'      # Reject
-WITHDRAW = 'WIT'   # Withdraw
+WITHDRAW = 'WIT'    # Withdraw
 
 TEST_ACTION = ACCEPT
 
@@ -49,89 +49,32 @@ SAMPLE_MANUSCRIPT = {
     flds.REFEREES: [],
 }
 
+FUNC = 'f'
 
 # Reusable transitions for common actions
 COMMON_ACTIONS = {
     WITHDRAW: {
-        FUNC: lambda **kwargs: WITHDRAWN,
+        FUNC: lambda manuscript, **kwargs: WITHDRAWN,  # Accept positional arguments
     },
 }
 
-
 def get_states() -> list:
-    """
-    Returns the list of valid manuscript states.
-    
-    Returns:
-        list: All valid manuscript states
-    """
     return VALID_STATES
 
-
 def is_valid_state(state: str) -> bool:
-    """
-    Checks if a given state is valid.
-    
-    Args:
-        state (str): State to validate
-        
-    Returns:
-        bool: True if state is valid, False otherwise
-    """
     return state in VALID_STATES
 
-
 def get_actions() -> list:
-    """
-    Returns the list of valid actions.
-    
-    Returns:
-        list: All valid actions
-    """
     return VALID_ACTIONS
 
-
 def is_valid_action(action: str) -> bool:
-    """
-    Checks if a given action is valid.
-    
-    Args:
-        action (str): Action to validate
-        
-    Returns:
-        bool: True if action is valid, False otherwise
-    """
     return action in VALID_ACTIONS
 
-
 def assign_ref(manuscript: dict, ref: str, extra=None) -> str:
-    """
-    Handles the state transition when assigning a referee.
-    
-    Args:
-        manuscript (dict): Manuscript data
-        ref (str): New referee assigned to the manuscript
-        
-    Returns:
-        str: New state after referee assignment (In Referee Review)
-    """
-    print(extra)
     manuscript[flds.REFEREES].append(ref)
     return IN_REF_REV
 
-
 def delete_ref(manuscript: dict, ref: str) -> str:
-    """
-    Handles the state transition when deleting a referee.
-
-    Args:
-        manuscript (dict): Manuscript data
-        ref (str): Referee deleted from the manuscript 
-
-    Returns:
-        str: New state after referee deletion 
-             (In Referee Review if more refs, otherwise Submitted)
-    """
     if len(manuscript[flds.REFEREES]) > 0:
         manuscript[flds.REFEREES].remove(ref)
     if len(manuscript[flds.REFEREES]) > 0:
@@ -139,24 +82,19 @@ def delete_ref(manuscript: dict, ref: str) -> str:
     else:
         return SUBMITTED
 
-
-# State transition function identifier
-FUNC = 'f'
-
-# State transition table defining valid actions and their resulting states
 STATE_TABLE = {
     SUBMITTED: {
         ASSIGN_REF: {
-            FUNC: assign_ref,
+            FUNC: lambda manuscript, ref='Default Ref', **kwargs: assign_ref(manuscript, ref),
         },
         REJECT: {
-            FUNC: lambda **kwargs: REJECTED,
+            FUNC: lambda manuscript, **kwargs: REJECTED,
         },
         **COMMON_ACTIONS,
     },
     IN_REF_REV: {
         ASSIGN_REF: {
-            FUNC: assign_ref,
+            FUNC: lambda manuscript, ref='Default Ref', **kwargs: assign_ref(manuscript, ref),
         },
         DELETE_REF: {
             FUNC: delete_ref,
@@ -165,7 +103,7 @@ STATE_TABLE = {
     },
     COPY_EDIT: {
         DONE: {
-            FUNC: lambda **kwargs: AUTHOR_REV,
+            FUNC: lambda manuscript, **kwargs: AUTHOR_REV,
         },
         **COMMON_ACTIONS,
     },
@@ -180,49 +118,15 @@ STATE_TABLE = {
     },
 }
 
-
 def get_valid_actions_by_state(state: str) -> set:
-    """
-    Gets all valid actions for a given state.
-    
-    Args:
-        state (str): Current manuscript state
-        
-    Returns:
-        set: Valid actions for the given state
-    """
+    if state not in STATE_TABLE:
+        return set()
     valid_actions = STATE_TABLE[state].keys()
-    print(f'{valid_actions=}')
-    return valid_actions
+    return set(valid_actions)
 
-
-def handle_action(curr_state: str, action: str, manuscript: dict) -> str:
-    """
-    Processes a state transition based on the current state and action.
-    
-    Args:
-        curr_state (str): Current manuscript state
-        action (str): Action to perform
-        manuscript (dict): Manuscript data
-        
-    Returns:
-        str: New state after action is performed
-        
-    Raises:
-        ValueError: If state or action is invalid
-    """
+def handle_action(curr_state: str, action: str, manuscript: dict, **kwargs) -> str:
     if curr_state not in STATE_TABLE:
         raise ValueError(f'Bad state: {curr_state}')
     if action not in STATE_TABLE[curr_state]:
         raise ValueError(f'{action} not available in {curr_state}')
-    return STATE_TABLE[curr_state][action][FUNC](manuscript)
-
-
-def main():
-    """Test the state transition functionality."""
-    print(handle_action(SUBMITTED, ASSIGN_REF, SAMPLE_MANUSCRIPT))
-    print(handle_action(SUBMITTED, REJECT, SAMPLE_MANUSCRIPT))
-
-
-if __name__ == '__main__':
-    main()
+    return STATE_TABLE[curr_state][action][FUNC](manuscript, **kwargs)
