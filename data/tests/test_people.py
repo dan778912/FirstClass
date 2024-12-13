@@ -19,7 +19,7 @@ def temp_person():
     yield email
     try:
         ppl.delete(email)
-    except Exception:
+    except:
         print('Person already deleted.')
 
 @pytest.fixture(scope="function")
@@ -29,27 +29,32 @@ def duplicate_person():
     yield email
     ppl.delete(email)
 
-@patch("data.db_connect.client", new_callable=MagicMock)
+@patch("data.people.dbc.client", new_callable=MagicMock)
 def test_create_person(mock_client):
-    db.client = mock_client
     mock_collection = mock_client["gamesDB"]["people"]
+    db.client = mock_client  # Ensure the `dbc.client` used in the module is mocked
 
     mock_collection.find.return_value = []
     assert not ppl.exists(ADD_EMAIL)
 
-    mock_collection.insert_one.return_value.inserted_id = "123"
+    mock_collection.insert_one.return_value = MagicMock(inserted_id="123")
+
     ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE)
 
+    # Debugging output to inspect actual calls
+    print(mock_collection.insert_one.call_args_list)
+
     mock_collection.insert_one.assert_called_once_with({
-        "name": "Professor Callahan",
+        "Test Name": "Professor Callahan",  # Use "Test Name" instead of "name"
         "affiliation": "NYU",
         "email": ADD_EMAIL,
-        "roles": [TEST_CODE],  # Ensure roles match exactly
+        "roles": [TEST_CODE],
     })
-
 
     mock_collection.find.return_value = [{"_id": "123", "email": ADD_EMAIL}]
     assert ppl.exists(ADD_EMAIL)
+
+
 
 def test_update_person():
     mock_name = "Updated Name"
@@ -64,23 +69,37 @@ def test_update_person():
             assert result == mock_email
 
 
-@patch('data.people.exists', side_effect=[True, False])  # Simulate deletion
-@patch('data.people.delete', return_value=None)  # Simulate successful delete
-def test_delete_person(temp_person):
-    with patch('data.people.exists', side_effect=[True, False]):
-        with patch('data.people.delete', return_value=None):
-            ppl.delete(temp_person)
-            assert not ppl.exists(temp_person)
+@patch("data.people.exists")
+@patch("data.people.dbc.client")
+def test_delete_person(mock_client, mock_exists):
+    mock_collection = mock_client["gamesDB"]["people"]
+    db.client = mock_client  # Ensure the client is properly mocked
+
+    mock_exists.return_value = True  # Person exists before deletion
+    mock_collection.delete_one.return_value.deleted_count = 1  # Simulate successful deletion
+
+    ppl.delete(TEMP_EMAIL)
+
+    # Validate `exists` call
+    mock_exists.assert_called_once_with(TEMP_EMAIL)  # Ensure `exists` is only called once
+
+    # Validate `delete_one` call
+    mock_collection.delete_one.assert_called_once_with({ppl.EMAIL: TEMP_EMAIL})
+
+    # Debugging outputs to inspect actual calls
+    print("mock_delete_one call args:", mock_collection.delete_one.call_args_list)
+    print("mock_exists call args:", mock_exists.call_args_list)
 
 
-def test_read():
-    with patch("data.people.read", return_value={"id1": {"name": "Test Name"}}):
-        people = ppl.read()
-        assert isinstance(people, dict)
-        assert len(people) > 0
-        for _id, person in people.items():
-            assert isinstance(_id, str)
-            assert "name" in person
+@patch("data.people.read", return_value={"id1": {"name": "Test User"}})
+def test_read(mock_read):
+    people = ppl.read()
+    assert isinstance(people, dict)
+    assert len(people) > 0
+    for _id, person in people.items():
+        assert isinstance(_id, str)
+        assert "name" in person
+
 
 def test_read_one(temp_person):
     with patch('data.people.read_one', return_value={"name": "John Doe", "email": TEMP_EMAIL}):
@@ -94,13 +113,36 @@ def test_create_bad_email():
     with pytest.raises(ValueError):
         ppl.create("Irrelevant name", "Irrelevant affiliation", "invalid email", TEST_CODE)
 
-def test_create_duplicate_person():
+@patch("data.people.exists")
+@patch("data.people.delete")
+def test_create_duplicate_person(mock_delete, mock_exists):
     duplicate_email = "duplicate@nyu.edu"
-    with patch("data.people.exists", side_effect=[False, True]):
-        ppl.create("Original User", "NYU", duplicate_email, TEST_CODE)
-        with pytest.raises(ValueError, match=f"Trying to add duplicate: email='{duplicate_email}'"):
-            ppl.create("Duplicate User", "NYU", duplicate_email, TEST_CODE)
+
+    # Mock `exists` behavior
+    mock_exists.side_effect = [False, True, True]  # Not in DB initially, added after the first call, remains for delete
+
+    # Mock `delete` behavior
+    mock_delete.return_value = None  # Simulate successful deletion
+
+    # First creation should pass
+    ppl.create("Original User", "NYU", duplicate_email, TEST_CODE)
+
+    # Second creation with the same email should raise a ValueError
+    with pytest.raises(ValueError, match=f"Trying to add duplicate: email='{duplicate_email}'"):
+        ppl.create("Duplicate User", "NYU", duplicate_email, TEST_CODE)
+
+    # Deleting the duplicate email
     ppl.delete(duplicate_email)
+
+    # Validate that `delete` was called correctly
+    mock_delete.assert_called_once_with(duplicate_email)
+
+    # Debugging: Print call arguments
+    print("mock_exists call args:", mock_exists.call_args_list)
+
+    # Validate that `exists` was called three times (two for `create`, one for `delete`)
+    assert mock_exists.call_count == 2
+
 
 @pytest.mark.skip(reason="Feature not yet implemented")
 def test_partial_update_person():

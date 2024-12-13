@@ -90,39 +90,56 @@ STATE_TABLE = {
         REJECT: {
             FUNC: lambda manuscript, **kwargs: REJECTED,
         },
-        **COMMON_ACTIONS,
+        WITHDRAW: {
+            FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+        },
     },
     IN_REF_REV: {
         ASSIGN_REF: {
             FUNC: lambda manuscript, ref='Default Ref', **kwargs: assign_ref(manuscript, ref),
         },
         DELETE_REF: {
-            FUNC: delete_ref,
+            FUNC: lambda manuscript, ref='Default Ref', **kwargs: delete_ref(manuscript, ref),
         },
-        **COMMON_ACTIONS,
+        WITHDRAW: {
+            FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+        },
     },
     COPY_EDIT: {
         DONE: {
             FUNC: lambda manuscript, **kwargs: AUTHOR_REV,
         },
-        **COMMON_ACTIONS,
     },
     AUTHOR_REV: {
-        **COMMON_ACTIONS,
+        WITHDRAW: {
+            FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+        },
     },
     REJECTED: {
-        **COMMON_ACTIONS,
+        WITHDRAW: {
+            FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+        },
     },
     WITHDRAWN: {
-        **COMMON_ACTIONS,
     },
 }
 
+
 def get_valid_actions_by_state(state: str) -> set:
+    """
+    Gets all valid actions for a given state.
+
+    Args:
+        state (str): Current manuscript state
+
+    Returns:
+        set: Valid actions for the given state
+    """
     if state not in STATE_TABLE:
         return set()
     valid_actions = STATE_TABLE[state].keys()
     return set(valid_actions)
+
 
 def handle_action(curr_state: str, action: str, manuscript: dict, **kwargs) -> str:
     if curr_state not in STATE_TABLE:

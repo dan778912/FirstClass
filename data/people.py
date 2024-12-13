@@ -144,5 +144,7 @@ def delete(email: str):
     Returns:
         Bool: DB person entry.
     """
+    if not exists(email):
+        raise ValueError(f"Person does not exist: {email=}")
     print(f'{EMAIL=}, {email=}')
     return dbc.delete(PEOPLE_COLLECT, {EMAIL: email})
