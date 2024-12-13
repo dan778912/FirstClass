@@ -49,6 +49,15 @@ SAMPLE_MANUSCRIPT = {
     flds.REFEREES: [],
 }
 
+
+# Reusable transitions for common actions
+COMMON_ACTIONS = {
+    WITHDRAW: {
+        FUNC: lambda **kwargs: WITHDRAWN,
+    },
+}
+
+
 def get_states() -> list:
     """
     Returns the list of valid manuscript states.
@@ -138,21 +147,37 @@ FUNC = 'f'
 STATE_TABLE = {
     SUBMITTED: {
         ASSIGN_REF: {
-            FUNC: lambda m: IN_REF_REV,
+            FUNC: assign_ref,
         },
         REJECT: {
-            FUNC: lambda m: REJECTED,
+            FUNC: lambda **kwargs: REJECTED,
         },
+        **COMMON_ACTIONS,
     },
-    IN_REF_REV: {},
+    IN_REF_REV: {
+        ASSIGN_REF: {
+            FUNC: assign_ref,
+        },
+        DELETE_REF: {
+            FUNC: delete_ref,
+        },
+        **COMMON_ACTIONS,
+    },
     COPY_EDIT: {
         DONE: {
-            FUNC: lambda m: AUTHOR_REV,
+            FUNC: lambda **kwargs: AUTHOR_REV,
         },
+        **COMMON_ACTIONS,
     },
-    AUTHOR_REV: {},
-    REJECTED: {},
-    WITHDRAWN: {},
+    AUTHOR_REV: {
+        **COMMON_ACTIONS,
+    },
+    REJECTED: {
+        **COMMON_ACTIONS,
+    },
+    WITHDRAWN: {
+        **COMMON_ACTIONS,
+    },
 }
 
 
