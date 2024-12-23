@@ -55,6 +55,6 @@ jobs:
 
       - name: Reload PythonAnywhere Web App
         run: |
-          curl -X POST -H "Authorization: Token ${{ secrets.PA_TOKEN }}" https://www.pythonanywhere.com/api/v0/user/zcd/webapps/zcd.pythonanywhere.com/reload/
+          curl -X POST -H "Authorization: Token ${{ secrets.API_TOKEN }}" https://www.pythonanywhere.com/api/v0/user/zcd/webapps/zcd.pythonanywhere.com/reload/
         env:
-          PA_TOKEN: ${{ secrets.PA_TOKEN }}
+          PA_TOKEN: ${{ secrets.API_TOKEN }}
