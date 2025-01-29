@@ -12,7 +12,7 @@ We already have basic CRUD functionality, without much granularity in terms of w
 Basic CRUD functionality already exists, and corresponding tests. Similar to the People class, we have no distinction between which roles can edit text and which roles cannot.
 
 ### Manuscripts
-We have CRUD functionality, but are lacking a few tests which will be implemented within the upcoming week. 
+We have some basic functionality but lack components that complete the FSM shown in the diagram, such as which roles can do what.
 
 ## Goals for this semester
 
@@ -46,5 +46,5 @@ This advanced goal might be fun to accomplish if times allows (and with the ince
 
 ## Links 
 * [Link to user requirements](https://github.com/gcallah/SoftwareEngineering/blob/master/docs/user_reqs_spring_2025.md)
+* [Link to manuscript FSM](https://github.com/AthenaKouKou/journal/blob/main/docs/Manuscript_FSM.jpg)
 * [Link to README](README.md)
-
