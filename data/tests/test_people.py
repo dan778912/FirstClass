@@ -45,7 +45,7 @@ def test_create_person(mock_client):
     print(mock_collection.insert_one.call_args_list)
 
     mock_collection.insert_one.assert_called_once_with({
-        "Test Name": "Professor Callahan",  # Use "Test Name" instead of "name"
+        "name": "Professor Callahan",
         "affiliation": "NYU",
         "email": ADD_EMAIL,
         "roles": [TEST_CODE],

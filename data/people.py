@@ -11,7 +11,7 @@ print(f'{client=}')
 PEOPLE_COLLECT = 'people'
 MIN_USER_NAME_LEN = 2
 
-NAME = "Test Name"
+NAME = "name"
 ROLES = "roles"
 ROLE = "role"
 AFFILIATION = "affiliation"
