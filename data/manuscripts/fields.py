@@ -1,5 +1,6 @@
-# fields.py 
+# fields.py
 
+# Field Names
 TITLE = 'title'
 AUTHOR = 'author'
 AUTHOR_EMAIL = 'author_email'
@@ -25,6 +26,19 @@ TEST_FIELD_TEXT_DISPLAY_NAME = 'Text'
 TEST_FIELD_ABSTRACT_DISPLAY_NAME = 'Abstract'
 TEST_FIELD_HISTORY_DISPLAY_NAME = 'History'
 TEST_FIELD_EDITOR_DISPLAY_NAME = 'Editor'
+TEST_FIELD_REPORT_DISPLAY_NAME = 'Report'
+TEST_FIELD_VERDICT_DISPLAY_NAME = 'Verdict'
+
+# State Display Names
+STATE_SUBMITTED_DISPLAY_NAME = 'Submitted'
+STATE_IN_REF_REV_DISPLAY_NAME = 'In Referee Review'
+STATE_EDITOR_REVIEW_DISPLAY_NAME = 'Editor Review'
+STATE_COPY_EDIT_DISPLAY_NAME = 'Copy Editing'
+STATE_AUTHOR_REVIEW_DISPLAY_NAME = 'Author Review'
+STATE_FORMATTING_DISPLAY_NAME = 'Formatting'
+STATE_PUBLISHED_DISPLAY_NAME = 'Published'
+STATE_REJECTED_DISPLAY_NAME = 'Rejected'
+STATE_WITHDRAWN_DISPLAY_NAME = 'Withdrawn'
 
 FIELDS = {
     TITLE: {DISPLAY_NAME: TEST_FIELD_TITLE_DISPLAY_NAME},
@@ -32,10 +46,25 @@ FIELDS = {
     AUTHOR_EMAIL: {DISPLAY_NAME: TEST_FIELD_AUTHOR_EMAIL_DISPLAY_NAME},
     STATE: {DISPLAY_NAME: TEST_FIELD_STATE_DISPLAY_NAME},
     REFEREES: {DISPLAY_NAME: TEST_FIELD_REFEREES_DISPLAY_NAME},
+    REPORT: {DISPLAY_NAME: TEST_FIELD_REPORT_DISPLAY_NAME},
+    VERDICT: {DISPLAY_NAME: TEST_FIELD_VERDICT_DISPLAY_NAME},
     TEXT: {DISPLAY_NAME: TEST_FIELD_TEXT_DISPLAY_NAME},
     ABSTRACT: {DISPLAY_NAME: TEST_FIELD_ABSTRACT_DISPLAY_NAME},
     HISTORY: {DISPLAY_NAME: TEST_FIELD_HISTORY_DISPLAY_NAME},
     EDITOR: {DISPLAY_NAME: TEST_FIELD_EDITOR_DISPLAY_NAME},
+}
+
+# State mappings
+STATE_DISPLAY_NAMES = {
+    'SUB': STATE_SUBMITTED_DISPLAY_NAME,
+    'REV': STATE_IN_REF_REV_DISPLAY_NAME,
+    'EDR': STATE_EDITOR_REVIEW_DISPLAY_NAME,
+    'CED': STATE_COPY_EDIT_DISPLAY_NAME,
+    'AUR': STATE_AUTHOR_REVIEW_DISPLAY_NAME,
+    'FMT': STATE_FORMATTING_DISPLAY_NAME,
+    'PUB': STATE_PUBLISHED_DISPLAY_NAME,
+    'REJ': STATE_REJECTED_DISPLAY_NAME,
+    'WIT': STATE_WITHDRAWN_DISPLAY_NAME,
 }
 
 
@@ -60,6 +89,14 @@ def get_display_name(field_name: str) -> str:
     """
     field = FIELDS.get(field_name, {})
     return field.get(DISPLAY_NAME, '')
+
+
+def get_state_display_name(state_code: str) -> str:
+    """
+    Return the display name for a given state code.
+    If the state code does not exist, return an empty string.
+    """
+    return STATE_DISPLAY_NAMES.get(state_code, '')
 
 
 def is_field_valid(field_name: str) -> bool:
@@ -136,13 +173,15 @@ def main():
     print(f'Field Names: {get_field_names()}')
     print(f'Title Display Name: {get_display_name(TITLE)}')
     print(f'Is "title" valid? {is_field_valid(TITLE)}')
+    print(f'State SUB Display Name: {get_state_display_name("SUB")}')
 
     # Test adding a new field
     print(f'Adding new field: {add_field("new_field", "New Field")}')
     print(f'Fields after adding: {get_fields()}')
 
     # Test updating a field display name
-    print(f'Updating "title" display name: {update_field_display_name(TITLE, "Updated Title")}')
+    print(f'Updating "title" display name: '
+          f'{update_field_display_name(TITLE, "Updated Title")}')
     print(f'Fields after updating: {get_fields()}')
 
     # Test removing a field
