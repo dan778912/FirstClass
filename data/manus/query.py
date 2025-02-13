@@ -3,7 +3,7 @@ This module handles manuscript state management and transitions.
 It defines valid states, actions, and the rules for transitioning between states.
 """
 
-import data.manuscripts.fields as flds
+import data.manus.fields as flds
 
 
 # Manuscript States
