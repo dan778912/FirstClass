@@ -60,7 +60,8 @@ def create(collection, doc, db=GAME_DB):
     Insert a single doc into collection.
     """
     print(f'{db=}')
-    return client[db][collection].insert_one(doc)
+    result = client[db][collection].insert_one(doc)
+    return str(result.inserted_id)
 
 
 def read_one(collection, filt, db=GAME_DB):

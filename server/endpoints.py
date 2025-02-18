@@ -273,7 +273,7 @@ MANU_ACTION_FLDS = api.model('ManuscriptAction', {
     manu.MANU_ID: fields.String,
     manu.CURR_STATE: fields.String,
     manu.ACTION: fields.String,
-    manu.REFEREE: fields.String,
+    manu.REFEREES: fields.String,
 })
 
 
@@ -295,7 +295,7 @@ class ReceiveAction(Resource):
             curr_state = request.json.get(manu.CURR_STATE)
             action = request.json.get(manu.ACTION)
             kwargs = {}
-            kwargs[manu.REFEREE] = request.json.get(manu.REFEREE)
+            kwargs[manu.REFEREES] = request.json.get(manu.REFEREES)
             ret = manu.handle_action(manu_id, curr_state, action, **kwargs)
         except Exception as err:
             raise wz.NotAcceptable(f'Bad action: ' f'{err=}')
@@ -303,3 +303,38 @@ class ReceiveAction(Resource):
             MESSAGE: 'Action received!',
             RETURN: ret,
         }
+
+
+MANU_CREATE_FLDS = api.model('CreateManuscript', {
+    manu.TITLE: fields.String,
+    manu.AUTHOR: fields.String,
+    manu.REFEREES: fields.List(fields.String)
+})
+
+
+@api.route(f'{MANU_EP}/create')
+class CreateManuscript(Resource):
+    """
+    Create a new manuscript.
+    """
+    @api.expect(MANU_CREATE_FLDS)
+    def put(self):
+        """
+        Create a new manuscript.
+        """
+        try:
+            title = request.json.get(manu.TITLE)
+            author = request.json.get(manu.AUTHOR)
+            # make referees optional
+            manu.CURR_STATE = "SUB"  # intial state is submitted
+
+            if not title or not author:
+                raise ValueError("Title and author are required")
+
+            manu_id = manu.create_manuscript(title, author)
+            return {
+                MESSAGE: 'Manuscript created successfully!',
+                RETURN: manu_id,
+            }
+        except Exception as err:
+            raise wz.NotAcceptable(f'Failed to create manuscript: {str(err)}')

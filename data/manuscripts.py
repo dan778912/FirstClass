@@ -1,16 +1,18 @@
+import data.db_connect as dbc
+
+
 ACTION = 'action'
 AUTHOR = 'author'
 CURR_STATE = 'curr_state'
 DISP_NAME = 'disp_name'
 MANU_ID = '_id'
-REFEREE = 'referee'
+# REFEREE = 'referee'
 REFEREES = 'referees'
 TITLE = 'title'
 
 TEST_ID = 'fake_id'
 TEST_FLD_NM = TITLE
 TEST_FLD_DISP_NM = 'Title'
-
 
 FIELDS = {
     TITLE: {
@@ -37,19 +39,46 @@ VALID_STATES = [
 ]
 
 
-SAMPLE_MANU = {
-    TITLE: 'Short module import names in Python',
-    AUTHOR: 'Eugene Callahan',
-    REFEREES: [],
-}
+def create_manuscript(title: str, author: str) -> str:
+    """
+    Creates a new manuscript in the database.
+    Args:
+        title: str - Title of the manuscript
+        author: str - Author of the manuscript
+    Returns:
+        str: ID of the created manuscript
+    """
+    manuscript = {
+        TITLE: title,
+        AUTHOR: author,
+        REFEREES: [],
+        CURR_STATE: SUBMITTED  # All new manuscripts start in SUBMITTED state
+    }
+    manu_id = dbc.create('manuscripts', manuscript)
+    return manu_id
 
 
-def get_states() -> list:
-    return VALID_STATES
+def get_manuscript(manu_id: str) -> dict:
+    """
+    Retrieves a manuscript from the database.
+    Args:
+        manu_id: str - ID of the manuscript to retrieve
+    Returns:
+        dict: The manuscript document, or None if not found
+    """
+    return dbc.read_one('manuscripts', {MANU_ID: manu_id})
 
 
-def is_valid_state(state: str) -> bool:
-    return state in VALID_STATES
+def update_manuscript(manu_id: str, updates: dict) -> bool:
+    """
+    Updates a manuscript in the database.
+    Args:
+        manu_id: str - ID of the manuscript to update
+        updates: dict - Dictionary of fields to update
+    Returns:
+        bool: True if update was successful
+    """
+    return dbc.update('manuscripts', {MANU_ID: manu_id}, updates)
 
 
 # actions:
@@ -146,12 +175,26 @@ def get_valid_actions_by_state(state: str):
 
 
 def handle_action(manu_id, curr_state, action, **kwargs) -> str:
-    kwargs['manu'] = SAMPLE_MANU
+    """
+    Handle an action on a manuscript.
+    """
+    # Get the manuscript from the database instead of using SAMPLE_MANU
+    manus = get_manuscript(manu_id)
+    if not manus:
+        raise ValueError(f'Manuscript not found: {manu_id}')
+
     if curr_state not in STATE_TABLE:
         raise ValueError(f'Bad state: {curr_state}')
     if action not in STATE_TABLE[curr_state]:
         raise ValueError(f'{action} not available in {curr_state}')
-    return STATE_TABLE[curr_state][action][FUNC](**kwargs)
+
+    # Execute the action and get the new state
+    new_state = STATE_TABLE[curr_state][action][FUNC](**kwargs, manu=manus)
+
+    # Update the manuscript in the database with the new state
+    update_manuscript(manu_id, {CURR_STATE: new_state})
+
+    return new_state
 
 
 def main():
