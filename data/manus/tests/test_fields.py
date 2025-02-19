@@ -1,5 +1,6 @@
 import pytest
-from data.manuscripts import fields as fld
+from data.manus import fields as fld
+
 
 def test_get_fields():
     """
