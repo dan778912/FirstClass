@@ -269,11 +269,22 @@ class Masthead(Resource):
         return {MASTHEAD: mh.get_masthead()}
 
 
+REFEREE_FIELDS = api.model('RefereeData', {
+    'report': fields.String(required=False, description='Referee report'),
+    'verdict': fields.String(required=False, description='Referee verdict')
+})
+
+
 MANU_ACTION_FLDS = api.model('ManuscriptAction', {
-    manu.MANU_ID: fields.String,
-    manu.CURR_STATE: fields.String,
-    manu.ACTION: fields.String,
-    manu.REFEREES: fields.String,
+    manu.MANU_ID: fields.String(required=True,
+                                description='Manuscript ID'),
+    manu.CURR_STATE: fields.String(required=True,
+                                   description='Current state'),
+    manu.ACTION: fields.String(required=True, description='Action to perform'),
+    'referee': fields.String(required=False,
+                             description='Referee email for referee stuff'),
+    'referee_data': fields.Nested(REFEREE_FIELDS, required=False,
+                                  description='Additional referee data')
 })
 
 
@@ -290,25 +301,34 @@ class ReceiveAction(Resource):
         Receive an action for a manuscript.
         """
         try:
-            print(request.json)
-            manu_id = request.json.get(manu.MANU_ID)
-            curr_state = request.json.get(manu.CURR_STATE)
-            action = request.json.get(manu.ACTION)
+            data = request.json
+            manu_id = data.get(manu.MANU_ID)
+            curr_state = data.get(manu.CURR_STATE)
+            action = data.get(manu.ACTION)
+
+            # Build kwargs based on the action
             kwargs = {}
-            kwargs[manu.REFEREES] = request.json.get(manu.REFEREES)
+            if action in ['ARF', 'DRF']:  # Referee-related actions
+                referee = data.get('referee')
+                if not referee:
+                    raise ValueError("Referee email required for referee")
+                kwargs['referee'] = referee
+                # Include referee data if provided
+                if data.get('referee_data'):
+                    kwargs['extra'] = data['referee_data']
+
             ret = manu.handle_action(manu_id, curr_state, action, **kwargs)
+            return {
+                MESSAGE: 'Action received!',
+                RETURN: ret,
+            }
         except Exception as err:
-            raise wz.NotAcceptable(f'Bad action: ' f'{err=}')
-        return {
-            MESSAGE: 'Action received!',
-            RETURN: ret,
-        }
+            raise wz.NotAcceptable(f'Bad action: {str(err)}')
 
 
 MANU_CREATE_FLDS = api.model('CreateManuscript', {
     manu.TITLE: fields.String,
     manu.AUTHOR: fields.String,
-    manu.REFEREES: fields.List(fields.String)
 })
 
 

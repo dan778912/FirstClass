@@ -51,7 +51,7 @@ def create_manuscript(title: str, author: str) -> str:
     manuscript = {
         TITLE: title,
         AUTHOR: author,
-        REFEREES: [],
+        REFEREES: {},
         CURR_STATE: SUBMITTED  # All new manuscripts start in SUBMITTED state
     }
     manu_id = dbc.create('manuscripts', manuscript)
