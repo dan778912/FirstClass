@@ -316,7 +316,7 @@ class ReceiveAction(Resource):
                 # Include referee data if provided
                 if data.get('referee_data'):
                     kwargs['extra'] = data['referee_data']
-
+            print("here")
             ret = manu.handle_action(manu_id, curr_state, action, **kwargs)
             return {
                 MESSAGE: 'Action received!',
@@ -330,6 +330,14 @@ MANU_CREATE_FLDS = api.model('CreateManuscript', {
     manu.TITLE: fields.String,
     manu.AUTHOR: fields.String,
 })
+
+# @api.route(f'{MANU_EP}')
+# class GetManuscripts(Resource):
+#     """
+#     Get a list of all manuscripts.
+#     """
+#     def get(self):
+#         return {MANU_LIST: manu.get_manuscripts()}
 
 
 @api.route(f'{MANU_EP}/create')
@@ -346,7 +354,7 @@ class CreateManuscript(Resource):
             title = request.json.get(manu.TITLE)
             author = request.json.get(manu.AUTHOR)
             # make referees optional
-            manu.CURR_STATE = "SUB"  # intial state is submitted
+            manu.CURR_STATE = "curr_state"
 
             if not title or not author:
                 raise ValueError("Title and author are required")

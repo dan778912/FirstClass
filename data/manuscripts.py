@@ -1,11 +1,12 @@
 import data.db_connect as dbc
-
+import random
+from mnemonic import Mnemonic
 
 ACTION = 'action'
 AUTHOR = 'author'
 CURR_STATE = 'curr_state'
 DISP_NAME = 'disp_name'
-MANU_ID = '_id'
+MANU_ID = 'manu_id'
 # REFEREE = 'referee'
 REFEREES = 'referees'
 TITLE = 'title'
@@ -39,6 +40,24 @@ VALID_STATES = [
 ]
 
 
+def generate_id() -> str:
+    """
+    Generates a unique ID for a manuscript.
+    Returns:
+        str: The generated ID.
+    NOTE: This function will loop endlessly if a collision occurs.
+    """
+    mnemo = Mnemonic('english')
+    while True:
+        # Generate 32 hex characters (128 bits of entropy)
+        entropy = ''.join(random.choices('0123456789abcdef', k=32))
+        words = mnemo.to_mnemonic(bytes.fromhex(entropy))
+        key = "".join(words.split()[:3])
+        # If the key doesn't exist in the database, return it
+        if not dbc.read_one('manuscripts', {MANU_ID: key}):
+            return key
+
+
 def create_manuscript(title: str, author: str) -> str:
     """
     Creates a new manuscript in the database.
@@ -48,14 +67,20 @@ def create_manuscript(title: str, author: str) -> str:
     Returns:
         str: ID of the created manuscript
     """
+    id = generate_id()
     manuscript = {
+        MANU_ID: id,
         TITLE: title,
         AUTHOR: author,
         REFEREES: {},
         CURR_STATE: SUBMITTED  # All new manuscripts start in SUBMITTED state
     }
     manu_id = dbc.create('manuscripts', manuscript)
-    return manu_id
+    print(id)
+    if manu_id is None:
+        raise ValueError("Failed to create manuscript")
+    else:
+        return id
 
 
 def get_manuscript(manu_id: str) -> dict:
@@ -66,6 +91,7 @@ def get_manuscript(manu_id: str) -> dict:
     Returns:
         dict: The manuscript document, or None if not found
     """
+    print("getting manuscript... let's see where the db call takes us")
     return dbc.read_one('manuscripts', {MANU_ID: manu_id})
 
 
@@ -198,15 +224,16 @@ def handle_action(manu_id, curr_state, action, **kwargs) -> str:
 
 
 def main():
-    print(handle_action(TEST_ID, SUBMITTED, ASSIGN_REF, ref='Jack'))
-    print(handle_action(TEST_ID, IN_REF_REV, ASSIGN_REF,
-                        ref='Jill', extra='Extra!'))
-    print(handle_action(TEST_ID, IN_REF_REV, DELETE_REF,
-                        ref='Jill'))
-    print(handle_action(TEST_ID, IN_REF_REV, DELETE_REF,
-                        ref='Jack'))
-    print(handle_action(TEST_ID, SUBMITTED, WITHDRAW))
-    print(handle_action(TEST_ID, SUBMITTED, REJECT))
+    # print(handle_action(TEST_ID, SUBMITTED, ASSIGN_REF, ref='Jack'))
+    # print(handle_action(TEST_ID, IN_REF_REV, ASSIGN_REF,
+    #                     ref='Jill', extra='Extra!'))
+    # print(handle_action(TEST_ID, IN_REF_REV, DELETE_REF,
+    #                     ref='Jill'))
+    # print(handle_action(TEST_ID, IN_REF_REV, DELETE_REF,
+    #                     ref='Jack'))
+    # print(handle_action(TEST_ID, SUBMITTED, WITHDRAW))
+    # print(handle_action(TEST_ID, SUBMITTED, REJECT))
+    print(generate_id())
 
 
 if __name__ == '__main__':

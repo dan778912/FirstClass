@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock, patch
-import pytest
+# import pytest
 import data.db_connect as db
 
 TEST_COLLECTION = "test_collection"
@@ -52,7 +52,7 @@ def test_insert_one(mock_client):
     db.create(TEST_COLLECTION, TEST_DOC, db=TEST_DB)
     mock_collection.insert_one.assert_called_once_with(TEST_DOC)
 
-
+# @pytest.mark.skip(reason="Feature needs debugging")
 @patch("data.db_connect.client", new_callable=MagicMock)
 def test_fetch_one(mock_client):
     db.client = mock_client
@@ -117,7 +117,7 @@ def test_read(mock_client):
 def test_read_dict(mock_client):
     db.client = mock_client
     mock_collection = mock_client[TEST_DB][TEST_COLLECTION]
-    
+
     mock_collection.find.return_value = [{"_id": "123", "name": "test"}]
 
     result = db.read_dict(TEST_COLLECTION, key="name", db=TEST_DB, no_id=False)
