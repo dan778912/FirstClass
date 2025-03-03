@@ -316,7 +316,6 @@ class ReceiveAction(Resource):
                 # Include referee data if provided
                 if data.get('referee_data'):
                     kwargs['extra'] = data['referee_data']
-            print("here")
             ret = manu.handle_action(manu_id, curr_state, action, **kwargs)
             return {
                 MESSAGE: 'Action received!',

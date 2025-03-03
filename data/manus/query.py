@@ -239,12 +239,12 @@ def handle_action(curr_state: str, action: str, manuscript: dict, **kwargs) -> s
     """
     if curr_state not in STATE_TABLE:
         raise ValueError(f'Bad state: {curr_state}')
-    
+
     # Handle editor move separately
     if action == EDITOR_MOVE:
         target_state = kwargs.get('target_state', SUBMITTED)
         return editor_move(manuscript, target_state)
-        
+
     if action not in STATE_TABLE[curr_state]:
         raise ValueError(f'{action} not available in {curr_state}')
     return STATE_TABLE[curr_state][action][FUNC](manuscript, **kwargs)

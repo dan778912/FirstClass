@@ -1,4 +1,5 @@
 import data.db_connect as dbc
+import data.manus.query as query
 import random
 from mnemonic import Mnemonic
 
@@ -76,7 +77,6 @@ def create_manuscript(title: str, author: str) -> str:
         CURR_STATE: SUBMITTED  # All new manuscripts start in SUBMITTED state
     }
     manu_id = dbc.create('manuscripts', manuscript)
-    print(id)
     if manu_id is None:
         raise ValueError("Failed to create manuscript")
     else:
@@ -91,7 +91,6 @@ def get_manuscript(manu_id: str) -> dict:
     Returns:
         dict: The manuscript document, or None if not found
     """
-    print("getting manuscript... let's see where the db call takes us")
     return dbc.read_one('manuscripts', {MANU_ID: manu_id})
 
 
@@ -104,35 +103,38 @@ def update_manuscript(manu_id: str, updates: dict) -> bool:
     Returns:
         bool: True if update was successful
     """
-    return dbc.update('manuscripts', {MANU_ID: manu_id}, updates)
+    result = dbc.update('manuscripts', {MANU_ID: manu_id}, updates)
+    print(dbc.read_one('manuscripts', {MANU_ID: manu_id}))
+    return result
 
+# Commenting out because we just pull directly from query file
+# # actions:
+# ACCEPT = 'ACC'
+# ASSIGN_REF = 'ARF'
+# DELETE_REF = 'DRF'
+# DONE = 'DON'
+# REJECT = 'REJ'
+# WITHDRAW = 'WIT'
+# AUTHOR
+# # for testing:
+# TEST_ACTION = ACCEPT
 
-# actions:
-ACCEPT = 'ACC'
-ASSIGN_REF = 'ARF'
-DELETE_REF = 'DRF'
-DONE = 'DON'
-REJECT = 'REJ'
-WITHDRAW = 'WIT'
-# for testing:
-TEST_ACTION = ACCEPT
-
-VALID_ACTIONS = [
-    ACCEPT,
-    ASSIGN_REF,
-    DELETE_REF,
-    DONE,
-    REJECT,
-    WITHDRAW,
-]
+# VALID_ACTIONS = [
+#     ACCEPT,
+#     ASSIGN_REF,
+#     DELETE_REF,
+#     DONE,
+#     REJECT,
+#     WITHDRAW,
+# ]
 
 
 def get_actions() -> list:
-    return VALID_ACTIONS
+    return query.VALID_ACTIONS
 
 
 def is_valid_action(action: str) -> bool:
-    return action in VALID_ACTIONS
+    return action in query.VALID_ACTIONS
 
 
 def assign_ref(manu: dict, referee: str, extra=None) -> str:
@@ -151,51 +153,82 @@ def delete_ref(manu: dict, referee: str) -> str:
 
 FUNC = 'f'
 
-COMMON_ACTIONS = {
-    WITHDRAW: {
-        FUNC: lambda **kwargs: WITHDRAWN,
-    },
-}
+# COMMON_ACTIONS = {
+#     WITHDRAW: {
+#         FUNC: lambda **kwargs: WITHDRAWN,
+#     },
+# }
 
-STATE_TABLE = {
-    SUBMITTED: {
-        ASSIGN_REF: {
-            FUNC: assign_ref,
-        },
-        REJECT: {
-            FUNC: lambda **kwargs: REJECTED,
-        },
-        **COMMON_ACTIONS,
-    },
-    IN_REF_REV: {
-        ASSIGN_REF: {
-            FUNC: assign_ref,
-        },
-        DELETE_REF: {
-            FUNC: delete_ref,
-        },
-        **COMMON_ACTIONS,
-    },
-    COPY_EDIT: {
-        DONE: {
-            FUNC: lambda **kwargs: AUTHOR_REV,
-        },
-        **COMMON_ACTIONS,
-    },
-    AUTHOR_REV: {
-        **COMMON_ACTIONS,
-    },
-    REJECTED: {
-        **COMMON_ACTIONS,
-    },
-    WITHDRAWN: {
-        **COMMON_ACTIONS,
-    },
-}
+# STATE_TABLE = {
+#     SUBMITTED: {
+#         ASSIGN_REF: {
+#             FUNC: lambda manuscript, ref='Default Ref', **kwargs:
+#                 assign_ref(manuscript, ref),
+#         },
+#         REJECT: {
+#             FUNC: lambda manuscript, **kwargs: REJECTED,
+#         },
+#         WITHDRAW: {
+#             FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+#         },
+#     },
+#     IN_REF_REV: {
+#         ACCEPT: {
+#             FUNC: lambda manuscript, **kwargs: COPY_EDIT,
+#         },
+#         ASSIGN_REF: {
+#             FUNC: lambda manuscript, ref='Default Ref', **kwargs:
+#                 assign_ref(manuscript, ref),
+#         },
+#         DELETE_REF: {
+#             FUNC: lambda manuscript, ref='Default Ref', **kwargs:
+#                 delete_ref(manuscript, ref),
+#         },
+#         REJECT: {
+#             FUNC: lambda manuscript, **kwargs: REJECTED,
+#         },
+#         WITHDRAW: {
+#             FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+#         },
+#     },
+#     COPY_EDIT: {
+#         DONE: {
+#             FUNC: lambda manuscript, **kwargs: query.AUTHOR_REVIEW,
+#         },
+#     },
+#     query.AUTHOR_REVIEW: {
+#         DONE: {
+#             FUNC: lambda manuscript, **kwargs: query.FORMATTING,
+#         },
+#         WITHDRAW: {
+#             FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+#         },
+#     },
+#     query.FORMATTING: {
+#         DONE: {
+#             FUNC: lambda manuscript, **kwargs: query.PUBLISHED,
+#         },
+#     },
+#     query.EDITOR_REVIEW: {
+#         ACCEPT: {
+#             FUNC: lambda manuscript, **kwargs: COPY_EDIT,
+#         },
+#         REJECT: {
+#             FUNC: lambda manuscript, **kwargs: REJECTED,
+#         },
+#     },
+#     REJECTED: {
+#         WITHDRAW: {
+#             FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+#         },
+#     },
+#     query.PUBLISHED: {},
+#     WITHDRAWN: {},
+# }
 
 
 def get_valid_actions_by_state(state: str):
-    valid_actions = STATE_TABLE[state].keys()
+    valid_actions = query.STATE_TABLE[state].keys()
     print(f'{valid_actions=}')
     return valid_actions
 
@@ -209,13 +242,19 @@ def handle_action(manu_id, curr_state, action, **kwargs) -> str:
     if not manus:
         raise ValueError(f'Manuscript not found: {manu_id}')
 
-    if curr_state not in STATE_TABLE:
+    if curr_state not in query.STATE_TABLE:
         raise ValueError(f'Bad state: {curr_state}')
-    if action not in STATE_TABLE[curr_state]:
+    if action not in query.STATE_TABLE[curr_state]:
         raise ValueError(f'{action} not available in {curr_state}')
 
     # Execute the action and get the new state
-    new_state = STATE_TABLE[curr_state][action][FUNC](**kwargs, manu=manus)
+    new_state = query.STATE_TABLE[curr_state][action][FUNC](
+                                            **kwargs, manuscript=manus)
+    # new_state = (
+    #     query.STATE_TABLE[curr_state][action][FUNC](
+    #         **kwargs, manu=manus
+    #     )
+    # )
 
     # Update the manuscript in the database with the new state
     update_manuscript(manu_id, {CURR_STATE: new_state})
