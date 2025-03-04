@@ -11,6 +11,7 @@ MANU_ID = 'manu_id'
 # REFEREE = 'referee'
 REFEREES = 'referees'
 TITLE = 'title'
+MANU_COLLECT = "manuscripts"
 
 TEST_ID = 'fake_id'
 TEST_FLD_NM = TITLE
@@ -94,6 +95,21 @@ def get_manuscript(manu_id: str) -> dict:
     return dbc.read_one('manuscripts', {MANU_ID: manu_id})
 
 
+def read() -> dict:
+    """
+    Reads information from Person fields and returns it.
+    Args:
+        None
+    Returns:
+        dict: dictionary of users keyed by email
+    """
+    manu_list = []
+    for manu in dbc.fetch_all(MANU_COLLECT):
+        dbc.convert_mongo_id(manu)
+        manu_list.append(manu)
+    return manu_list
+
+
 def update_manuscript(manu_id: str, updates: dict) -> bool:
     """
     Updates a manuscript in the database.
@@ -104,7 +120,18 @@ def update_manuscript(manu_id: str, updates: dict) -> bool:
         bool: True if update was successful
     """
     result = dbc.update('manuscripts', {MANU_ID: manu_id}, updates)
-    print(dbc.read_one('manuscripts', {MANU_ID: manu_id}))
+    return result
+
+
+def delete_manuscript(manu_id: str) -> bool:
+    """
+    Deletes a manuscript from the database.
+    Args:
+        manu_id: str - ID of the manuscript to delete
+    Returns:
+        bool: True if deletion was successful
+    """
+    result = dbc.delete('manuscripts', {MANU_ID: manu_id})
     return result
 
 # Commenting out because we just pull directly from query file

@@ -288,6 +288,15 @@ MANU_ACTION_FLDS = api.model('ManuscriptAction', {
 })
 
 
+@api.route(f'{MANU_EP}')
+class GetManuscripts(Resource):
+    """fetch all manuscripts"""
+
+    def get(self):
+        """fetch the manuscripts"""
+        return manu.read()
+
+
 @api.route(f'{MANU_EP}/receive_action')
 class ReceiveAction(Resource):
     """
