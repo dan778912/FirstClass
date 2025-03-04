@@ -56,7 +56,7 @@ def generate_id() -> str:
         words = mnemo.to_mnemonic(bytes.fromhex(entropy))
         key = "".join(words.split()[:3])
         # If the key doesn't exist in the database, return it
-        if not dbc.read_one('manuscripts', {MANU_ID: key}):
+        if not dbc.read_one(MANU_COLLECT, {MANU_ID: key}):
             return key
 
 
@@ -77,7 +77,7 @@ def create_manuscript(title: str, author: str) -> str:
         REFEREES: {},
         CURR_STATE: SUBMITTED  # All new manuscripts start in SUBMITTED state
     }
-    manu_id = dbc.create('manuscripts', manuscript)
+    manu_id = dbc.create(MANU_COLLECT, manuscript)
     if manu_id is None:
         raise ValueError("Failed to create manuscript")
     else:
@@ -92,7 +92,7 @@ def get_manuscript(manu_id: str) -> dict:
     Returns:
         dict: The manuscript document, or None if not found
     """
-    return dbc.read_one('manuscripts', {MANU_ID: manu_id})
+    return dbc.read_one(MANU_COLLECT, {MANU_ID: manu_id})
 
 
 def read() -> dict:
@@ -119,7 +119,7 @@ def update_manuscript(manu_id: str, updates: dict) -> bool:
     Returns:
         bool: True if update was successful
     """
-    result = dbc.update('manuscripts', {MANU_ID: manu_id}, updates)
+    result = dbc.update(MANU_COLLECT, {MANU_ID: manu_id}, updates)
     return result
 
 
@@ -131,7 +131,7 @@ def delete_manuscript(manu_id: str) -> bool:
     Returns:
         bool: True if deletion was successful
     """
-    result = dbc.delete('manuscripts', {MANU_ID: manu_id})
+    result = dbc.delete(MANU_COLLECT, {MANU_ID: manu_id})
     return result
 
 # Commenting out because we just pull directly from query file
@@ -270,7 +270,7 @@ def handle_action(manu_id, curr_state, action, **kwargs) -> str:
         raise ValueError(f'Manuscript not found: {manu_id}')
 
     if curr_state not in query.STATE_TABLE:
-        raise ValueError(f'Bad state: {curr_state}')
+        raise ValueError(f'Action not available: {curr_state}')
     if action not in query.STATE_TABLE[curr_state]:
         raise ValueError(f'{action} not available in {curr_state}')
 

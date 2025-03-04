@@ -339,13 +339,17 @@ MANU_CREATE_FLDS = api.model('CreateManuscript', {
     manu.AUTHOR: fields.String,
 })
 
-# @api.route(f'{MANU_EP}')
-# class GetManuscripts(Resource):
-#     """
-#     Get a list of all manuscripts.
-#     """
-#     def get(self):
-#         return {MANU_LIST: manu.get_manuscripts()}
+
+@api.route(f'{MANU_EP}/delete/<string:_id>')
+class DeleteManuscript(Resource):
+    @api.response(HTTPStatus.OK, 'Success.')
+    @api.response(HTTPStatus.NOT_FOUND, 'No such manuscript.')
+    def delete(self, _id):
+        ret = manu.delete_manuscript(_id)
+        if ret != 0:
+            return {'Deleted': ret}
+        else:
+            raise wz.NotFound(f'No such manuscript: {_id}')
 
 
 @api.route(f'{MANU_EP}/create')
