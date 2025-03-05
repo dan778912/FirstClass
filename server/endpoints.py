@@ -231,30 +231,24 @@ class PersonCreate(Resource):
 
 @api.route(f'{PEOPLE_EP}/update/<current_email>')
 class PersonUpdate(Resource):
-    """
-    This class updates an existing person in the journal database.
-    """
     @api.response(HTTPStatus.OK, 'Success.')
     @api.response(HTTPStatus.NOT_ACCEPTABLE, 'Not acceptable.')
     @api.expect(PEOPLE_CREATE_FLDS)
     def put(self, current_email):
-        """
-        Update the person with the provided email, return the updated person.
-        """
         data = request.json
         try:
             name = data.get('name')
             affiliation = data.get('affiliation')
-            new_email = data.get('new email')
+            new_email = data.get('email')
             role = data.get('role')
-            ret = ppl.update(current_email, name, affiliation, new_email, role)
+            roles = [role] if role else []
+            ret = ppl.update(name, affiliation, current_email, roles)
             return {
                 MESSAGE: 'Person updated!',
                 RETURN: ret
             }
         except Exception as err:
-            raise wz.NotAcceptable(f'Could not update person: '
-                                   f'{err=}')
+            raise wz.NotAcceptable(f'Could not update person: {err=}')
 
 
 MASTHEAD = 'Masthead'
