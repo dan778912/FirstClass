@@ -242,7 +242,8 @@ class PersonUpdate(Resource):
             new_email = data.get('email')
             role = data.get('role')
             roles = [role] if role else []
-            ret = ppl.update(name, affiliation, current_email, roles)
+            email_to_use = new_email if new_email else current_email
+            ret = ppl.update(name, affiliation, email_to_use, roles)
             return {
                 MESSAGE: 'Person updated!',
                 RETURN: ret
