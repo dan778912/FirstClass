@@ -7,6 +7,7 @@ import data.people as ppl
 import data.text as txt
 import data.masthead as mh
 import data.manuscripts as manu
+import data.roles as rls
 import sys
 import os
 
@@ -17,7 +18,7 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-DATE = '2024-09-24'
+DATE = '2024-09-24'  # should get the actual date
 DATE_RESP = 'Date'
 EDITOR = 'ayy9673@nyu.edu'
 EDITOR_RESP = 'Editor'
@@ -35,7 +36,10 @@ TITLE_RESP = 'Title'
 TITLE = 'The Journal'
 TEXT_EP = '/text'
 MANU_EP = '/manuscripts'
+ROLES_EP = '/roles'
 
+
+# figure out how to structure endpoints to clump classes together
 
 @api.route(HELLO_EP)
 class HelloWorld(Resource):
@@ -63,6 +67,18 @@ class Endpoints(Resource):
         """
         endpoints = sorted(rule.rule for rule in api.app.url_map.iter_rules())
         return {"Available endpoints": endpoints}
+
+
+@api.route(ROLES_EP)
+class Roles(Resource):
+    """
+    This class handles reading person roles.
+    """
+    def get(self):
+        """
+        Retrieve the journal person roles.
+        """
+        return rls.read()
 
 
 @api.route(TITLE_EP)
@@ -242,8 +258,8 @@ class PersonUpdate(Resource):
             new_email = data.get('email')
             role = data.get('role')
             roles = [role] if role else []
-            email_to_use = new_email if new_email else current_email
-            ret = ppl.update(name, affiliation, email_to_use, roles)
+            email = new_email if new_email else current_email
+            ret = ppl.update(current_email, name, affiliation, email, roles)
             return {
                 MESSAGE: 'Person updated!',
                 RETURN: ret

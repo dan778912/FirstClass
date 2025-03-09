@@ -1,5 +1,5 @@
 # roles.py
-
+from copy import deepcopy
 """
 This module manages person roles for a journal.
 """
@@ -23,6 +23,10 @@ PERSON_ROLES = {
 }
 
 MASTHEAD_ROLES = [CE_CODE, ED_CODE, ME_CODE]
+
+
+def read() -> dict:
+    return deepcopy(PERSON_ROLES)
 
 
 def get_roles() -> dict:

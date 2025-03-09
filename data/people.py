@@ -84,7 +84,7 @@ def create(name: str, affiliation: str, email: str, role: str):
         return email
 
 
-def update(name: str, affiliation: str, email: str, roles: list):
+def update(curr_email: str, name: str, affil: str, email: str, roles: list):
     """
     Updates a Person's name, affiliation, roles, or email
     Args:
@@ -96,15 +96,15 @@ def update(name: str, affiliation: str, email: str, roles: list):
     Returns:
         string: email value in dictionary
     """
-    if not exists(email):
+    if not exists(curr_email):
         raise ValueError(
             f'Trying to update person that does not exist: '
-            f'{email=}'
+            f'{curr_email=}'
         )
-    if is_valid_person(name, affiliation, email, roles=roles):
+    if is_valid_person(name, affil, curr_email, roles=roles):
         ret = dbc.update(PEOPLE_COLLECT,
-                         {EMAIL: email},
-                         {NAME: name, AFFILIATION: affiliation,
+                         {EMAIL: curr_email},
+                         {NAME: name, AFFILIATION: affil,
                           EMAIL: email, ROLES: roles})
         print(f'{ret=}')
         return email

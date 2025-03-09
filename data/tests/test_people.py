@@ -60,6 +60,7 @@ def test_create_person(mock_client):
 
 
 def test_update_person():
+    mock_new_email = "updatetest123@nyu.edu"
     mock_name = "Updated Name"
     mock_affiliation = "Columbia"
     mock_email = "updatetest@nyu.edu"
@@ -67,9 +68,9 @@ def test_update_person():
 
     with patch('data.people.exists', return_value=True):
         with patch('data.people.is_valid_person', return_value=True):
-            result = ppl.update(mock_name, mock_affiliation, mock_email,
-                                mock_roles)
-            assert result == mock_email
+            result = ppl.update(mock_email, mock_name, mock_affiliation,
+                                mock_new_email, mock_roles)
+            assert result == mock_new_email
 
 
 @patch("data.people.exists")
@@ -107,7 +108,8 @@ def test_read(mock_read):
 
 
 def test_read_one(temp_person):
-    with patch('data.people.read_one', return_value={"name": "John Doe", "email": TEMP_EMAIL}):
+    with patch('data.people.read_one',
+               return_value={"name": "John Doe", "email": TEMP_EMAIL}):
         assert ppl.read_one(temp_person) is not None
 
 
