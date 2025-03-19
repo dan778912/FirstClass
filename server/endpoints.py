@@ -2,6 +2,7 @@ from http import HTTPStatus
 from flask import Flask, request
 from flask_restx import Resource, Api, fields
 from flask_cors import CORS
+from datetime import datetime, timezone
 import werkzeug.exceptions as wz
 import data.people as ppl
 import data.text as txt
@@ -18,7 +19,7 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-DATE = '2024-09-24'  # should get the actual date
+DATE = datetime.now(timezone.utc).isoformat()  # should get the actual date
 DATE_RESP = 'Date'
 EDITOR = 'ayy9673@nyu.edu'
 EDITOR_RESP = 'Editor'
