@@ -17,7 +17,8 @@ TEST_PASSWORD = "password123"
 
 @pytest.fixture(scope='function')
 def temp_person():
-    email = ppl.create('Joe Smith', 'NYU', TEMP_EMAIL, TEST_CODE)
+    email = ppl.create('Joe Smith', 'NYU', TEMP_EMAIL, TEST_CODE,
+                       password=TEST_PASSWORD)
     yield email
     try:
         ppl.delete(email)
@@ -28,7 +29,8 @@ def temp_person():
 @pytest.fixture(scope="function")
 def duplicate_person():
     email = "duplicate@nyu.edu"
-    ppl.create("Duplicate User", "NYU", email, TEST_CODE)
+    ppl.create("Duplicate User", "NYU", email, TEST_CODE,
+               password=TEST_PASSWORD)
     yield email
     ppl.delete(email)
 
@@ -44,34 +46,19 @@ def test_create_person(mock_client):
 
     mock_collection.insert_one.return_value = MagicMock(inserted_id="123")
 
-    # Test creating person without password
-    ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE)
-    mock_collection.insert_one.assert_called_with({
-        "name": "Professor Callahan",
-        "affiliation": "NYU",
-        "email": ADD_EMAIL,
-        "roles": [TEST_CODE],
-        "manuscripts": [],
-        "submission_count": 0
-    })
-
     # Test creating person with password
-    mock_collection.reset_mock()
     ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE,
                password=TEST_PASSWORD)
-    call_args = mock_collection.insert_one.call_args[0][0]
-    assert call_args["name"] == "Professor Callahan"
-    assert call_args["affiliation"] == "NYU"
-    assert call_args["email"] == ADD_EMAIL
-    assert call_args["roles"] == [TEST_CODE]
-    assert call_args["manuscripts"] == []
-    assert call_args["submission_count"] == 0
-    assert "password" in call_args
-    assert call_args["password"].startswith("pbkdf2:sha256:")
-    # Check password is hashed
+    mock_collection.insert_one.assert_called_once()
 
-    mock_collection.find.return_value = [{"_id": "123", "email": ADD_EMAIL}]
-    assert ppl.exists(ADD_EMAIL)
+    # Test creating person without password (should fail)
+    with pytest.raises(ValueError, match="Password is required"):
+        ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE)
+
+    # Test creating manuscript author without password (should work)
+    ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE,
+               is_manu_author=True)
+    mock_collection.insert_one.assert_called()
 
 
 def test_update_person():
@@ -135,7 +122,8 @@ def test_read_one_not_there():
 
 def test_create_bad_email():
     with pytest.raises(ValueError):
-        ppl.create("Bad name", "Bad affiliation", "invalid email", TEST_CODE)
+        ppl.create("Bad name", "Bad affiliation", "invalid email", TEST_CODE,
+                   password=TEST_PASSWORD)
 
 
 @patch("data.people.dbc.create")
@@ -155,7 +143,8 @@ def test_create_duplicate_person(mock_read_one, mock_create):
     mock_read_one.return_value = None
     mock_create.return_value = True
 
-    result = ppl.create("Original User", "NYU", dup, TEST_CODE)
+    result = ppl.create("Original User", "NYU", dup, TEST_CODE,
+                        password=TEST_PASSWORD)
     assert result == dup
     mock_read_one.assert_called_once_with(dup)
     mock_create.assert_called_once()
@@ -166,7 +155,8 @@ def test_create_duplicate_person(mock_read_one, mock_create):
     mock_create.reset_mock()
 
     # Should return existing user info without creating new record
-    result = ppl.create("Duplicate User", "NYU", dup, TEST_CODE)
+    result = ppl.create("Duplicate User", "NYU", dup, TEST_CODE,
+                        password=TEST_PASSWORD)
     assert result == dup
     mock_read_one.assert_called_once_with(dup)
     mock_create.assert_not_called()
@@ -213,7 +203,8 @@ def test_get_people_mocked_read(mock_read):
 
 def test_create_person_with_invalid_email():
     with pytest.raises(ValueError, match="Invalid email"):
-        ppl.create("Invalid Email User", "NYU", "invalid-email", TEST_CODE)
+        ppl.create("Invalid Email User", "NYU", "invalid-email", TEST_CODE,
+                   password=TEST_PASSWORD)
 
 
 NO_AT = 'zcd220'

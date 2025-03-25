@@ -212,7 +212,8 @@ PEOPLE_CREATE_FLDS = api.model('AddNewPeopleEntry', {
     ppl.NAME: fields.String,
     ppl.EMAIL: fields.String,
     ppl.AFFILIATION: fields.String,
-    ppl.ROLE: fields.String
+    ppl.ROLE: fields.String,
+    ppl.PASSWORD: fields.String(required=True)  # Password now required
 })
 
 
@@ -220,6 +221,7 @@ PEOPLE_CREATE_FLDS = api.model('AddNewPeopleEntry', {
 class PersonCreate(Resource):
     """
     This class adds a person to the journal database.
+    Password is required for direct user creation.
     """
     @api.response(HTTPStatus.OK, 'Success.')
     @api.response(HTTPStatus.NOT_ACCEPTABLE, 'Not acceptable.')
@@ -234,8 +236,12 @@ class PersonCreate(Resource):
             affiliation = data.get(ppl.AFFILIATION)
             email = data.get(ppl.EMAIL)
             role = data.get(ppl.ROLE)
+            password = data.get(ppl.PASSWORD)
 
-            ret = ppl.create(name, affiliation, email, role)
+            if not password:
+                raise ValueError("Password is required")
+
+            ret = ppl.create(name, affiliation, email, role, password=password)
 
             return {
                         MESSAGE: 'Person added!',

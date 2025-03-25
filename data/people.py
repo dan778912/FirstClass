@@ -67,13 +67,14 @@ def has_role(person: dict, role: str) -> bool:
 
 
 def create(name: str, affiliation: str, email: str, role: str,
-           password: str = None) -> str:
+           password: str = None, is_manu_author: bool = False) -> str:
     """
     Creates a new entity Person.
     Returns the email used as the key.
     Args:
         string: name, affiliation, email, role
-        password: optional password for authentication
+        password: req password for auth (except for manu authors)
+        is_manu_author: if True, password is optional (for manu submissions)
     Returns:
         string: email value in dictionary
     """
@@ -81,6 +82,10 @@ def create(name: str, affiliation: str, email: str, role: str,
     existing = read_one(email)
     if existing:
         return email
+
+    # Password required unless it's a manuscript author
+    if not is_manu_author and not password:
+        raise ValueError("Password is required for non-manuscript users")
 
     if is_valid_person(name, affiliation, email, role=role):
         person = {

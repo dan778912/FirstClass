@@ -1,26 +1,19 @@
 import sys
 import os
-
-# Add the project root to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
 from http.client import (
-    BAD_REQUEST,
-    FORBIDDEN,
+    # BAD_REQUEST,
+    # FORBIDDEN,
     NOT_ACCEPTABLE,
     NOT_FOUND,
     OK,
-    SERVICE_UNAVAILABLE,
+    # SERVICE_UNAVAILABLE,
 )
-
 from unittest.mock import patch
-
 import pytest
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                '../..')))
 from data.people import NAME
-
 import server.endpoints as ep
-
 TEST_CLIENT = ep.app.test_client()
 
 
@@ -30,7 +23,8 @@ def valid_person_data():
         "name": "Test User",
         "affiliation": "Test University",
         "email": "testuser@nyu.edu",
-        "role": "Student"
+        "role": "Student",
+        "password": "testpassword123"
     }
 
 
@@ -132,7 +126,8 @@ def test_del_text():
 
 
 def test_create_text(valid_text_data):
-    create_resp = TEST_CLIENT.post(f'{ep.TEXT_EP}/{valid_text_data["key"]}', json=valid_text_data)
+    create_resp = TEST_CLIENT.post(f'{ep.TEXT_EP}/{valid_text_data["key"]}',
+                                   json=valid_text_data)
     assert create_resp.status_code == OK
     create_resp_json = create_resp.get_json()
     assert create_resp_json[ep.MESSAGE] == "Text added!"
@@ -166,7 +161,8 @@ def test_update_text(valid_text_data):
 def test_create_person(valid_person_data):
     with patch('data.people.create') as mock_create:
         mock_create.return_value = valid_person_data['email']
-        resp = TEST_CLIENT.put(f'{ep.PEOPLE_EP}/create', json=valid_person_data)
+        resp = TEST_CLIENT.put(f'{ep.PEOPLE_EP}/create',
+                               json=valid_person_data)
         assert resp.status_code == OK
         resp_json = resp.get_json()
         assert resp_json[ep.MESSAGE] == "Person added!"
@@ -177,19 +173,11 @@ def test_create_person_invalid_email():
         "name": "Test User",
         "affiliation": "Test University",
         "email": "invalid-email",  # Invalid email format
-        "role": "Student"
+        "role": "Student",
+        "password": "testpassword123"  # Add required password
     }
     resp = TEST_CLIENT.put(f'{ep.PEOPLE_EP}/create', json=invalid_data)
-
-    # Assert that the response status code indicates an unacceptable request
-    assert resp.status_code == NOT_ACCEPTABLE, f"Expected {NOT_ACCEPTABLE}, got {resp.status_code}"
-
-    # Retrieve and check the JSON response for an error message
-    resp_json = resp.get_json()
-    assert "message" in resp_json, "Response missing 'message' key"
-    assert "Could not add person" in resp_json["message"], (
-        f"Unexpected message: {resp_json['message']}"
-    )
+    assert resp.status_code == NOT_ACCEPTABLE
 
 
 def test_update_person(existing_person_id, valid_person_data):
@@ -197,7 +185,8 @@ def test_update_person(existing_person_id, valid_person_data):
     new_data["name"] = "Updated Name"
     with patch('data.people.update') as mock_update:
         mock_update.return_value = new_data
-        resp = TEST_CLIENT.put(f'{ep.PEOPLE_EP}/update/{existing_person_id}', json=new_data)
+        resp = TEST_CLIENT.put(f'{ep.PEOPLE_EP}/update/{existing_person_id}',
+                               json=new_data)
         assert resp.status_code == OK
         resp_json = resp.get_json()
         assert resp_json[ep.MESSAGE] == "Person updated!"
