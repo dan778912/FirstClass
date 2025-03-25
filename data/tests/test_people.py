@@ -12,6 +12,7 @@ ADD_EMAIL = "callahan@nyu.edu"
 TEMP_EMAIL = "temp_email@temp.com"
 TEST_DOC = {"name": "Professor Callahan", "affiliation": "NYU",
             "email": "callahan@nyu.edu", "roles": ["AU"]}
+TEST_PASSWORD = "password123"
 
 
 @pytest.fixture(scope='function')
@@ -20,8 +21,8 @@ def temp_person():
     yield email
     try:
         ppl.delete(email)
-    except:
-        print('Person already deleted.')
+    except ValueError as e:
+        print(f'Person already deleted: {e}')
 
 
 @pytest.fixture(scope="function")
@@ -43,17 +44,31 @@ def test_create_person(mock_client):
 
     mock_collection.insert_one.return_value = MagicMock(inserted_id="123")
 
+    # Test creating person without password
     ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE)
-
-    # Debugging output to inspect actual calls
-    print(mock_collection.insert_one.call_args_list)
-
-    mock_collection.insert_one.assert_called_once_with({
+    mock_collection.insert_one.assert_called_with({
         "name": "Professor Callahan",
         "affiliation": "NYU",
         "email": ADD_EMAIL,
         "roles": [TEST_CODE],
+        "manuscripts": [],
+        "submission_count": 0
     })
+
+    # Test creating person with password
+    mock_collection.reset_mock()
+    ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE,
+               password=TEST_PASSWORD)
+    call_args = mock_collection.insert_one.call_args[0][0]
+    assert call_args["name"] == "Professor Callahan"
+    assert call_args["affiliation"] == "NYU"
+    assert call_args["email"] == ADD_EMAIL
+    assert call_args["roles"] == [TEST_CODE]
+    assert call_args["manuscripts"] == []
+    assert call_args["submission_count"] == 0
+    assert "password" in call_args
+    assert call_args["password"].startswith("pbkdf2:sha256:")
+    # Check password is hashed
 
     mock_collection.find.return_value = [{"_id": "123", "email": ADD_EMAIL}]
     assert ppl.exists(ADD_EMAIL)
@@ -120,39 +135,54 @@ def test_read_one_not_there():
 
 def test_create_bad_email():
     with pytest.raises(ValueError):
-        ppl.create("Irrelevant name", "Irrelevant affiliation", "invalid email", TEST_CODE)
+        ppl.create("Bad name", "Bad affiliation", "invalid email", TEST_CODE)
 
 
-@patch("data.people.exists")
-@patch("data.people.delete")
-def test_create_duplicate_person(mock_delete, mock_exists):
-    duplicate_email = "duplicate@nyu.edu"
+@patch("data.people.dbc.create")
+@patch("data.people.read_one")
+def test_create_duplicate_person(mock_read_one, mock_create):
+    dup = "duplicate@nyu.edu"
+    existing_person = {
+        "email": dup,
+        "name": "Original User",
+        "affiliation": "NYU",
+        "roles": [TEST_CODE],
+        "manuscripts": [],
+        "submission_count": 0
+    }
 
-    # Mock `exists` behavior
-    mock_exists.side_effect = [False, True, True]
-    # Not in DB initially, added after the first call, remains for delete
+    # First creation - no existing user
+    mock_read_one.return_value = None
+    mock_create.return_value = True
 
-    # Mock `delete` behavior
-    mock_delete.return_value = None  # Simulate successful deletion
+    result = ppl.create("Original User", "NYU", dup, TEST_CODE)
+    assert result == dup
+    mock_read_one.assert_called_once_with(dup)
+    mock_create.assert_called_once()
 
-    # First creation should pass
-    ppl.create("Original User", "NYU", duplicate_email, TEST_CODE)
+    # Second creation - user exists
+    mock_read_one.return_value = existing_person
+    mock_read_one.reset_mock()
+    mock_create.reset_mock()
 
-    # Second creation with the same email should raise a ValueError
-    with pytest.raises(ValueError, match=f"Trying to add duplicate: email='{duplicate_email}'"):
-        ppl.create("Duplicate User", "NYU", duplicate_email, TEST_CODE)
+    # Should return existing user info without creating new record
+    result = ppl.create("Duplicate User", "NYU", dup, TEST_CODE)
+    assert result == dup
+    mock_read_one.assert_called_once_with(dup)
+    mock_create.assert_not_called()
 
-    # Deleting the duplicate email
-    ppl.delete(duplicate_email)
+    # Test with password
+    mock_read_one.return_value = {
+        **existing_person,
+        "password": "hashed_password"
+    }
+    mock_read_one.reset_mock()
 
-    # Validate that `delete` was called correctly
-    mock_delete.assert_called_once_with(duplicate_email)
-
-    # Debugging: Print call arguments
-    print("mock_exists call args:", mock_exists.call_args_list)
-
-    # Validate that `exists` was called 3 times: 2 for `create`, 1 for `delete`
-    assert mock_exists.call_count == 2
+    result = ppl.create("Another User", "NYU", dup, TEST_CODE,
+                        password=TEST_PASSWORD)
+    assert result == dup
+    mock_read_one.assert_called_once_with(dup)
+    mock_create.assert_not_called()
 
 
 @pytest.mark.skip(reason="Feature not yet implemented")

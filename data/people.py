@@ -1,5 +1,6 @@
 # people.py
 import re
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import data.roles as rls
 from data.roles import PERSON_ROLES
@@ -16,6 +17,9 @@ ROLES = "roles"
 ROLE = "role"
 AFFILIATION = "affiliation"
 EMAIL = "email"
+PASSWORD = "password"
+MANUSCRIPTS = "manuscripts"
+SUBMISSION_COUNT = "submission_count"
 
 
 LOCAL_CHARS = r'[A-Za-z0-9.!#$%&\'*+-/=?^_`{|}~]+'
@@ -62,26 +66,37 @@ def has_role(person: dict, role: str) -> bool:
     return role in person.get(ROLES, [])
 
 
-def create(name: str, affiliation: str, email: str, role: str):
+def create(name: str, affiliation: str, email: str, role: str,
+           password: str = None) -> str:
     """
     Creates a new entity Person.
     Returns the email used as the key.
     Args:
         string: name, affiliation, email, role
+        password: optional password for authentication
     Returns:
         string: email value in dictionary
     """
-    if exists(email):
-        raise ValueError(f"Trying to add duplicate: {email=}")
-    if is_valid_person(name, affiliation, email, role=role):
-        roles = []
-        if role:
-            roles.append(role)
-        person = {NAME: name, AFFILIATION: affiliation,
-                  EMAIL: email, ROLES: roles}
-        print(person)
-        dbc.create(PEOPLE_COLLECT, person)
+    # Check if person already exists
+    existing = read_one(email)
+    if existing:
         return email
+
+    if is_valid_person(name, affiliation, email, role=role):
+        person = {
+            NAME: name,
+            AFFILIATION: affiliation,
+            EMAIL: email,
+            ROLES: [role],
+            MANUSCRIPTS: [],
+            SUBMISSION_COUNT: 0
+        }
+        if password:
+            person[PASSWORD] = generate_password_hash(password)
+
+        if dbc.create(PEOPLE_COLLECT, person):
+            return email
+    return None
 
 
 def update(curr_email: str, name: str, affil: str, email: str, roles: list):
@@ -148,3 +163,47 @@ def delete(email: str):
         raise ValueError(f"Person does not exist: {email=}")
     print(f'{EMAIL=}, {email=}')
     return dbc.delete(PEOPLE_COLLECT, {EMAIL: email})
+
+
+def authenticate(email: str, password: str) -> dict:
+    """
+    Authenticate a person with email and password
+    Returns None if authentication fails
+    """
+    person = read_one(email)
+    if not person or not person.get(PASSWORD):
+        return None
+
+    if check_password_hash(person[PASSWORD], password):
+        return person
+    return None
+
+
+def add_manuscript(email: str, manuscript_id: str) -> bool:
+    """
+    Add a manuscript ID to person's list of submissions
+    """
+    person = read_one(email)
+    if not person:
+        return False
+
+    manuscripts = person.get(MANUSCRIPTS, [])
+    if manuscript_id not in manuscripts:
+        manuscripts.append(manuscript_id)
+
+    update = {
+        MANUSCRIPTS: manuscripts,
+        SUBMISSION_COUNT: len(manuscripts)
+    }
+
+    return dbc.update_one(PEOPLE_COLLECT, {EMAIL: email}, {"$set": update})
+
+
+def get_manuscripts(email: str) -> list:
+    """
+    Get list of manuscript IDs submitted by person
+    """
+    person = read_one(email)
+    if not person:
+        return []
+    return person.get(MANUSCRIPTS, [])
