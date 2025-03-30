@@ -396,3 +396,48 @@ class CreateManuscript(Resource):
             }
         except Exception as err:
             raise wz.NotAcceptable(f'Failed to create manuscript: {str(err)}')
+
+
+AUTH_FLDS = api.model('AuthenticateUser', {
+    ppl.EMAIL: fields.String(required=True),
+    ppl.PASSWORD: fields.String(required=True)
+})
+
+
+@api.route(f'{PEOPLE_EP}/login')
+class PersonLogin(Resource):
+    """
+    This class handles user authentication.
+    """
+    @api.response(HTTPStatus.OK, 'Success.')
+    @api.response(HTTPStatus.UNAUTHORIZED, 'Invalid credentials.')
+    @api.expect(AUTH_FLDS)
+    def post(self):
+        """
+        Authenticate a user with email and password.
+        """
+        data = request.json
+        try:
+            email = data.get(ppl.EMAIL)
+            password = data.get(ppl.PASSWORD)
+
+            if not email or not password:
+                raise ValueError("Email and password are required")
+
+            person = ppl.authenticate(email, password)
+            if person:
+                return {
+                    MESSAGE: 'Authentication successful',
+                    RETURN: {
+                        'email': person[ppl.EMAIL],
+                        'name': person[ppl.NAME],
+                        'roles': person[ppl.ROLES]
+                    }
+                }
+            else:
+                raise wz.Unauthorized('Invalid email or password')
+
+        except Exception as err:
+            if isinstance(err, wz.Unauthorized):
+                raise
+            raise wz.NotAcceptable(f'Authentication failed: {err=}')
