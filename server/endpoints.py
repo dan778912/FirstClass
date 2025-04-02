@@ -403,7 +403,6 @@ class ManuscriptStateTransitions(Resource):
     def get(self):
         transitions = {}
         for state in manu.VALID_STATES:
-            # Convert the set of valid actions into a list for JSON serialization.
             transitions[state] = list(manu.get_valid_actions_by_state(state))
         return transitions
 
