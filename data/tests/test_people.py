@@ -13,11 +13,12 @@ TEMP_EMAIL = "temp_email@temp.com"
 TEST_DOC = {"name": "Professor Callahan", "affiliation": "NYU",
             "email": "callahan@nyu.edu", "roles": ["AU"]}
 TEST_PASSWORD = "password123"
+TEST_CODE = ["AU"]  # Use list of roles instead of single role
 
 
 @pytest.fixture(scope='function')
 def temp_person():
-    email = ppl.create('Joe Smith', 'NYU', TEMP_EMAIL, TEST_CODE,
+    email = ppl.create('Joe Smith', 'NYU', TEMP_EMAIL, roles=TEST_CODE,
                        password=TEST_PASSWORD)
     yield email
     try:
@@ -29,7 +30,7 @@ def temp_person():
 @pytest.fixture(scope="function")
 def duplicate_person():
     email = "duplicate@nyu.edu"
-    ppl.create("Duplicate User", "NYU", email, TEST_CODE,
+    ppl.create("Duplicate User", "NYU", email, roles=TEST_CODE,
                password=TEST_PASSWORD)
     yield email
     ppl.delete(email)
@@ -47,16 +48,16 @@ def test_create_person(mock_client):
     mock_collection.insert_one.return_value = MagicMock(inserted_id="123")
 
     # Test creating person with password
-    ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE,
+    ppl.create("Professor Callahan", "NYU", ADD_EMAIL, roles=TEST_CODE,
                password=TEST_PASSWORD)
     mock_collection.insert_one.assert_called_once()
 
     # Test creating person without password (should fail)
     with pytest.raises(ValueError, match="Password is required"):
-        ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE)
+        ppl.create("Professor Callahan", "NYU", ADD_EMAIL, roles=TEST_CODE)
 
     # Test creating manuscript author without password (should work)
-    ppl.create("Professor Callahan", "NYU", ADD_EMAIL, TEST_CODE,
+    ppl.create("Professor Callahan", "NYU", ADD_EMAIL, roles=TEST_CODE,
                is_manu_author=True)
     mock_collection.insert_one.assert_called()
 

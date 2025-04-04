@@ -43,11 +43,18 @@ def is_valid_person(
 ) -> bool:
     if not is_valid_email(email):
         raise ValueError(f'Invalid email: {email}')
+
+    # At least one role is required
+    if not role and not roles:
+        raise ValueError('At least one role is required')
+
     if role:
         if not rls.is_valid(role):
             print("these are person roles: ", PERSON_ROLES)
             raise ValueError(f'Invalid role: {role}')
     elif roles:
+        if not roles:  # Empty list
+            raise ValueError('At least one role is required')
         for role in roles:
             if not rls.is_valid(role):
                 raise ValueError(f'Invalid role: {role}')
@@ -66,13 +73,14 @@ def has_role(person: dict, role: str) -> bool:
     return role in person.get(ROLES, [])
 
 
-def create(name: str, affiliation: str, email: str, role: str,
+def create(name: str, affiliation: str, email: str, roles: list,
            password: str = None, is_manu_author: bool = False) -> str:
     """
     Creates a new entity Person.
     Returns the email used as the key.
     Args:
-        string: name, affiliation, email, role
+        string: name, affiliation, email
+        roles: list of role codes
         password: req password for auth (except for manu authors)
         is_manu_author: if True, password is optional (for manu submissions)
     Returns:
@@ -87,12 +95,12 @@ def create(name: str, affiliation: str, email: str, role: str,
     if not is_manu_author and not password:
         raise ValueError("Password is required for non-manuscript users")
 
-    if is_valid_person(name, affiliation, email, role=role):
+    if is_valid_person(name, affiliation, email, roles=roles):
         person = {
             NAME: name,
             AFFILIATION: affiliation,
             EMAIL: email,
-            ROLES: [role],
+            ROLES: roles,
             MANUSCRIPTS: [],
             SUBMISSION_COUNT: 0
         }
@@ -121,12 +129,19 @@ def update(curr_email: str, name: str, affil: str, email: str, roles: list):
             f'Trying to update person that does not exist: '
             f'{curr_email=}'
         )
+    print(f'Updating person {curr_email} with roles: {roles}')
     if is_valid_person(name, affil, curr_email, roles=roles):
+        update_data = {
+            NAME: name,
+            AFFILIATION: affil,
+            EMAIL: email,
+            ROLES: roles
+        }
+        print(f'Update data: {update_data}')
         ret = dbc.update(PEOPLE_COLLECT,
                          {EMAIL: curr_email},
-                         {NAME: name, AFFILIATION: affil,
-                          EMAIL: email, ROLES: roles})
-        print(f'{ret=}')
+                         update_data)
+        print(f'Update result: {ret=}')
         return email
 
 

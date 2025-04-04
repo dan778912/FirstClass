@@ -84,7 +84,18 @@ def delete(collection, filt, db=GAME_DB):
 
 
 def update(collection, filters, update_dict, db=GAME_DB):
-    return client[db][collection].update_one(filters, {'$set': update_dict})
+    """
+    Update an entry
+    Args:
+        collection: collection to update in
+        filters: filter for documents to update
+        update_dict: update dictionary for the document
+        db: database name (default: GAME_DB)
+    Returns:
+        UpdateResult from MongoDB
+    """
+    result = client[db][collection].update_one(filters, {'$set': update_dict})
+    return result
 
 
 def fetch_all(collection, db=GAME_DB):

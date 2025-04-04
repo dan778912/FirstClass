@@ -235,13 +235,18 @@ class PersonCreate(Resource):
             name = data.get(ppl.NAME)
             affiliation = data.get(ppl.AFFILIATION)
             email = data.get(ppl.EMAIL)
-            role = data.get(ppl.ROLE)
-            password = data.get(ppl.PASSWORD)
+            roles = data.get(ppl.ROLES, [])
+            if not roles:
+                # For backward compatibility, check single role
+                role = data.get(ppl.ROLE)
+                roles = [role] if role else []
 
+            password = data.get(ppl.PASSWORD)
             if not password:
                 raise ValueError("Password is required")
 
-            ret = ppl.create(name, affiliation, email, role, password=password)
+            ret = ppl.create(
+                name, affiliation, email, roles, password=password)
 
             return {
                         MESSAGE: 'Person added!',
@@ -259,12 +264,17 @@ class PersonUpdate(Resource):
     @api.expect(PEOPLE_CREATE_FLDS)
     def put(self, current_email):
         data = request.json
+        print('PersonUpdate - Received data:', data)
         try:
             name = data.get('name')
             affiliation = data.get('affiliation')
             new_email = data.get('email')
-            role = data.get('role')
-            roles = [role] if role else []
+            roles = data.get('roles', [])
+            if not roles:
+                # For backward compatibility
+                role = data.get('role')
+                roles = [role] if role else []
+            print('PersonUpdate - Extracted roles:', roles)
             email = new_email if new_email else current_email
             ret = ppl.update(current_email, name, affiliation, email, roles)
             return {
