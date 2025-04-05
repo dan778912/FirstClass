@@ -8,6 +8,7 @@ import data.people as ppl
 import data.text as txt
 import data.masthead as mh
 import data.manuscripts as manu
+import data.manus.query as query
 import data.roles as rls
 import sys
 import os
@@ -148,7 +149,6 @@ class Text(Resource):
                         RETURN: ret,
                     }
         except Exception as err:
-            print("excepted")
             raise wz.NotAcceptable(f'Could not add text: '
                                    f'{err=}')
 
@@ -412,7 +412,7 @@ class CreateManuscript(Resource):
 class ManuscriptStateTransitions(Resource):
     def get(self):
         transitions = {}
-        for state in manu.VALID_STATES:
+        for state in query.VALID_STATES:
             transitions[state] = list(manu.get_valid_actions_by_state(state))
         return transitions
 

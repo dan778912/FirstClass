@@ -1,16 +1,15 @@
 import data.db_connect as dbc
 import data.manus.query as query
+import data.manus.fields as flds
 import random
 from mnemonic import Mnemonic
 
 ACTION = 'action'
-AUTHOR = 'author'
+AUTHOR = flds.AUTHOR
 CURR_STATE = 'curr_state'
 DISP_NAME = 'disp_name'
 MANU_ID = 'manu_id'
-# REFEREE = 'referee'
-REFEREES = 'referees'
-TITLE = 'title'
+TITLE = flds.TITLE
 MANU_COLLECT = "manuscripts"
 
 TEST_ID = 'fake_id'
@@ -22,24 +21,6 @@ FIELDS = {
         DISP_NAME: TEST_FLD_DISP_NM,
     },
 }
-
-# states:
-AUTHOR_REV = 'AUR'
-COPY_EDIT = 'CED'
-IN_REF_REV = 'REV'
-REJECTED = 'REJ'
-SUBMITTED = 'SUB'
-WITHDRAWN = 'WIT'
-TEST_STATE = SUBMITTED
-
-VALID_STATES = [
-    AUTHOR_REV,
-    COPY_EDIT,
-    IN_REF_REV,
-    REJECTED,
-    SUBMITTED,
-    WITHDRAWN,
-]
 
 
 def generate_id() -> str:
@@ -74,8 +55,8 @@ def create_manuscript(title: str, author: str) -> str:
         MANU_ID: id,
         TITLE: title,
         AUTHOR: author,
-        REFEREES: {},
-        CURR_STATE: SUBMITTED  # All new manuscripts start in SUBMITTED state
+        flds.REFEREES: [],  # Initialize as empty list for referee assignments
+        CURR_STATE: query.SUBMITTED  # all start as submitted
     }
     manu_id = dbc.create(MANU_COLLECT, manuscript)
     if manu_id is None:
@@ -119,6 +100,7 @@ def update_manuscript(manu_id: str, updates: dict) -> bool:
     Returns:
         bool: True if update was successful
     """
+    print("trying to update")
     result = dbc.update(MANU_COLLECT, {MANU_ID: manu_id}, updates)
     return result
 
@@ -165,98 +147,24 @@ def is_valid_action(action: str) -> bool:
 
 
 def assign_ref(manu: dict, referee: str, extra=None) -> str:
-    manu[REFEREES].append(referee)
-    return IN_REF_REV
+    manu[flds.REFEREES].append(referee)
+    return query.IN_REF_REV
 
 
 def delete_ref(manu: dict, referee: str) -> str:
-    if len(manu[REFEREES]) > 0:
-        manu[REFEREES].remove(referee)
-    if len(manu[REFEREES]) > 0:
-        return IN_REF_REV
+    if len(manu[flds.REFEREES]) > 0:
+        manu[flds.REFEREES].remove(referee)
+    if len(manu[flds.REFEREES]) > 0:
+        return query.IN_REF_REV
     else:
-        return SUBMITTED
+        return query.SUBMITTED
 
 
 FUNC = 'f'
 
-# COMMON_ACTIONS = {
-#     WITHDRAW: {
-#         FUNC: lambda **kwargs: WITHDRAWN,
-#     },
-# }
-
-# STATE_TABLE = {
-#     SUBMITTED: {
-#         ASSIGN_REF: {
-#             FUNC: lambda manuscript, ref='Default Ref', **kwargs:
-#                 assign_ref(manuscript, ref),
-#         },
-#         REJECT: {
-#             FUNC: lambda manuscript, **kwargs: REJECTED,
-#         },
-#         WITHDRAW: {
-#             FUNC: lambda manuscript, **kwargs: WITHDRAWN,
-#         },
-#     },
-#     IN_REF_REV: {
-#         ACCEPT: {
-#             FUNC: lambda manuscript, **kwargs: COPY_EDIT,
-#         },
-#         ASSIGN_REF: {
-#             FUNC: lambda manuscript, ref='Default Ref', **kwargs:
-#                 assign_ref(manuscript, ref),
-#         },
-#         DELETE_REF: {
-#             FUNC: lambda manuscript, ref='Default Ref', **kwargs:
-#                 delete_ref(manuscript, ref),
-#         },
-#         REJECT: {
-#             FUNC: lambda manuscript, **kwargs: REJECTED,
-#         },
-#         WITHDRAW: {
-#             FUNC: lambda manuscript, **kwargs: WITHDRAWN,
-#         },
-#     },
-#     COPY_EDIT: {
-#         DONE: {
-#             FUNC: lambda manuscript, **kwargs: query.AUTHOR_REVIEW,
-#         },
-#     },
-#     query.AUTHOR_REVIEW: {
-#         DONE: {
-#             FUNC: lambda manuscript, **kwargs: query.FORMATTING,
-#         },
-#         WITHDRAW: {
-#             FUNC: lambda manuscript, **kwargs: WITHDRAWN,
-#         },
-#     },
-#     query.FORMATTING: {
-#         DONE: {
-#             FUNC: lambda manuscript, **kwargs: query.PUBLISHED,
-#         },
-#     },
-#     query.EDITOR_REVIEW: {
-#         ACCEPT: {
-#             FUNC: lambda manuscript, **kwargs: COPY_EDIT,
-#         },
-#         REJECT: {
-#             FUNC: lambda manuscript, **kwargs: REJECTED,
-#         },
-#     },
-#     REJECTED: {
-#         WITHDRAW: {
-#             FUNC: lambda manuscript, **kwargs: WITHDRAWN,
-#         },
-#     },
-#     query.PUBLISHED: {},
-#     WITHDRAWN: {},
-# }
-
 
 def get_valid_actions_by_state(state: str):
     valid_actions = query.STATE_TABLE[state].keys()
-    print(f'{valid_actions=}')
     return valid_actions
 
 
@@ -273,34 +181,14 @@ def handle_action(manu_id, curr_state, action, **kwargs) -> str:
         raise ValueError(f'Action not available: {curr_state}')
     if action not in query.STATE_TABLE[curr_state]:
         raise ValueError(f'{action} not available in {curr_state}')
-
     # Execute the action and get the new state
+
     new_state = query.STATE_TABLE[curr_state][action][FUNC](
-                                            **kwargs, manuscript=manus)
-    # new_state = (
-    #     query.STATE_TABLE[curr_state][action][FUNC](
-    #         **kwargs, manu=manus
-    #     )
-    # )
-
-    # Update the manuscript in the database with the new state
-    update_manuscript(manu_id, {CURR_STATE: new_state})
-
+                                            manuscript=manus, **kwargs)
+    # Update the manuscript in database with both state and any modified fields
+    updates = {
+        CURR_STATE: new_state,
+        flds.REFEREES: manus[flds.REFEREES]  # Include the updated ref list
+    }
+    update_manuscript(manu_id, updates)
     return new_state
-
-
-def main():
-    # print(handle_action(TEST_ID, SUBMITTED, ASSIGN_REF, ref='Jack'))
-    # print(handle_action(TEST_ID, IN_REF_REV, ASSIGN_REF,
-    #                     ref='Jill', extra='Extra!'))
-    # print(handle_action(TEST_ID, IN_REF_REV, DELETE_REF,
-    #                     ref='Jill'))
-    # print(handle_action(TEST_ID, IN_REF_REV, DELETE_REF,
-    #                     ref='Jack'))
-    # print(handle_action(TEST_ID, SUBMITTED, WITHDRAW))
-    # print(handle_action(TEST_ID, SUBMITTED, REJECT))
-    print(generate_id())
-
-
-if __name__ == '__main__':
-    main()

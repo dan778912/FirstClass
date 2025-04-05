@@ -1,6 +1,6 @@
 """
 This module handles manuscript state management and transitions.
-It defines valid states, actions, and the rules for transitioning between states.
+It defines valid states, actions, and the rules for transitions.
 """
 
 import data.manus.fields as flds
@@ -96,7 +96,7 @@ def delete_ref(manuscript: dict, ref: str) -> str:
     return SUBMITTED
 
 
-def editor_move(manuscript: dict, target_state: str = SUBMITTED, **kwargs) -> str:
+def editor_move(manu: dict, target_state: str = SUBMITTED, **kwargs) -> str:
     """
     Special function to allow editor to move to any valid state.
 
@@ -221,14 +221,14 @@ def get_valid_actions_by_state(state: str) -> set:
     return set(valid_actions)
 
 
-def handle_action(curr_state: str, action: str, manuscript: dict, **kwargs) -> str:
+def handle_action(curr_state: str, action: str, manu: dict, **kwargs) -> str:
     """
     Handle a state transition action.
 
     Args:
         curr_state: Current state
         action: Action to perform
-        manuscript: Manuscript dictionary
+        manu: Manuscript dictionary
         **kwargs: Additional keyword arguments
 
     Returns:
@@ -243,8 +243,8 @@ def handle_action(curr_state: str, action: str, manuscript: dict, **kwargs) -> s
     # Handle editor move separately
     if action == EDITOR_MOVE:
         target_state = kwargs.get('target_state', SUBMITTED)
-        return editor_move(manuscript, target_state)
+        return editor_move(manu, target_state)
 
     if action not in STATE_TABLE[curr_state]:
         raise ValueError(f'{action} not available in {curr_state}')
-    return STATE_TABLE[curr_state][action][FUNC](manuscript, **kwargs)
+    return STATE_TABLE[curr_state][action][FUNC](manu, **kwargs)

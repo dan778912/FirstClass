@@ -163,36 +163,3 @@ def get_disp_name(fld_nm: str) -> str:
     """
     fld = FIELDS.get(fld_nm, {})
     return fld.get(DISPLAY_NAME, '')
-
-
-def main():
-    """
-    Main function for testing.
-    """
-    print(f'Fields: {get_fields()}')
-    print(f'Field Names: {get_field_names()}')
-    print(f'Title Display Name: {get_display_name(TITLE)}')
-    print(f'Is "title" valid? {is_field_valid(TITLE)}')
-    print(f'State SUB Display Name: {get_state_display_name("SUB")}')
-
-    # Test adding a new field
-    print(f'Adding new field: {add_field("new_field", "New Field")}')
-    print(f'Fields after adding: {get_fields()}')
-
-    # Test updating a field display name
-    print(f'Updating "title" display name: '
-          f'{update_field_display_name(TITLE, "Updated Title")}')
-    print(f'Fields after updating: {get_fields()}')
-
-    # Test removing a field
-    print(f'Removing "new_field": {remove_field("new_field")}')
-    print(f'Fields after removing: {get_fields()}')
-
-    # Test professor's functions
-    print(f'Fields (Professor): {get_flds()}')
-    print(f'Field Names (Professor): {get_fld_names()}')
-    print(f'Display Name for Title (Professor): {get_disp_name(TITLE)}')
-
-
-if __name__ == '__main__':
-    main()
