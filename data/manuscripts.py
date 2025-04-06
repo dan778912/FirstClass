@@ -100,7 +100,6 @@ def update_manuscript(manu_id: str, updates: dict) -> bool:
     Returns:
         bool: True if update was successful
     """
-    print("trying to update")
     result = dbc.update(MANU_COLLECT, {MANU_ID: manu_id}, updates)
     return result
 
@@ -115,27 +114,6 @@ def delete_manuscript(manu_id: str) -> bool:
     """
     result = dbc.delete(MANU_COLLECT, {MANU_ID: manu_id})
     return result
-
-# Commenting out because we just pull directly from query file
-# # actions:
-# ACCEPT = 'ACC'
-# ASSIGN_REF = 'ARF'
-# DELETE_REF = 'DRF'
-# DONE = 'DON'
-# REJECT = 'REJ'
-# WITHDRAW = 'WIT'
-# AUTHOR
-# # for testing:
-# TEST_ACTION = ACCEPT
-
-# VALID_ACTIONS = [
-#     ACCEPT,
-#     ASSIGN_REF,
-#     DELETE_REF,
-#     DONE,
-#     REJECT,
-#     WITHDRAW,
-# ]
 
 
 def get_actions() -> list:
@@ -163,9 +141,9 @@ def delete_ref(manu: dict, referee: str) -> str:
 FUNC = 'f'
 
 
-def get_valid_actions_by_state(state: str):
-    valid_actions = query.STATE_TABLE[state].keys()
-    return valid_actions
+# def get_valid_actions_by_state(state: str):
+#     valid_actions = query.STATE_TABLE[state].keys()
+#     return valid_actions
 
 
 def handle_action(manu_id, curr_state, action, **kwargs) -> str:

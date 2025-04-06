@@ -264,7 +264,6 @@ class PersonUpdate(Resource):
     @api.expect(PEOPLE_CREATE_FLDS)
     def put(self, current_email):
         data = request.json
-        print('PersonUpdate - Received data:', data)
         try:
             name = data.get('name')
             affiliation = data.get('affiliation')
@@ -274,7 +273,6 @@ class PersonUpdate(Resource):
                 # For backward compatibility
                 role = data.get('role')
                 roles = [role] if role else []
-            print('PersonUpdate - Extracted roles:', roles)
             email = new_email if new_email else current_email
             ret = ppl.update(current_email, name, affiliation, email, roles)
             return {
@@ -413,7 +411,7 @@ class ManuscriptStateTransitions(Resource):
     def get(self):
         transitions = {}
         for state in query.VALID_STATES:
-            transitions[state] = list(manu.get_valid_actions_by_state(state))
+            transitions[state] = list(query.get_valid_actions_by_state(state))
         return transitions
 
 
