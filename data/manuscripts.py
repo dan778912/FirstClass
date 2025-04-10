@@ -66,7 +66,6 @@ def create_manuscript(title: str, author: str) -> str:
 
 
 def read_one(manu_id: str) -> dict:
-    # gotta fix this
     return dbc.read_one(MANU_COLLECT, {MANU_ID: manu_id})
 
 
@@ -162,7 +161,7 @@ def handle_action(manu_id, curr_state, action, **kwargs) -> str:
     Handle an action on a manuscript.
     """
     # Get the manuscript from the database instead of using SAMPLE_MANU
-    manus = get_manuscript(manu_id)
+    manus = read_one(manu_id)
     if not manus:
         raise ValueError(f'Manuscript not found: {manu_id}')
 

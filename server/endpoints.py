@@ -396,6 +396,7 @@ class ReceiveAction(Resource):
         try:
             data = request.json
             manu_id = data.get(manu.MANU_ID)
+            print(manu_id)
             curr_state = data.get(manu.CURR_STATE)
             action = data.get(manu.ACTION)
 
