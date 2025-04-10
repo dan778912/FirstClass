@@ -120,7 +120,7 @@ def editor_move(manu: dict, target_state: str = SUBMITTED, **kwargs) -> str:
 STATE_TABLE = {
     SUBMITTED: {
         ASSIGN_REF: {
-            FUNC: lambda manuscript, ref='Default Ref', **kwargs:
+            FUNC: lambda manuscript, ref, **kwargs:
                 assign_ref(manuscript, ref),
         },
         REJECT: {
@@ -135,11 +135,11 @@ STATE_TABLE = {
             FUNC: lambda manuscript, **kwargs: COPY_EDIT,
         },
         ASSIGN_REF: {
-            FUNC: lambda manuscript, ref='Default Ref', **kwargs:
+            FUNC: lambda manuscript, ref, **kwargs:
                 assign_ref(manuscript, ref),
         },
         DELETE_REF: {
-            FUNC: lambda manuscript, ref='Default Ref', **kwargs:
+            FUNC: lambda manuscript, ref, **kwargs:
                 delete_ref(manuscript, ref),
         },
         REJECT: {

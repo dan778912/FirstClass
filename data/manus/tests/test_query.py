@@ -85,19 +85,24 @@ def test_handle_action_valid_return():
     """Test that all valid state-action combinations return valid states."""
     for state in mqry.get_states():
         for action in mqry.get_valid_actions_by_state(state):
-            if action == mqry.DELETE_REF:  # Provide default `ref` for DELETE_REF
-                new_state = mqry.handle_action(state, action, mqry.SAMPLE_MANUSCRIPT, ref="Default Ref")
+            if action in [mqry.DELETE_REF, mqry.ASSIGN_REF]:
+                new_state = mqry.handle_action(
+                    state, action, mqry.SAMPLE_MANUSCRIPT, ref="test@nyu.edu")
             else:
-                new_state = mqry.handle_action(state, action, mqry.SAMPLE_MANUSCRIPT)
+                new_state = mqry.handle_action(
+                    state, action, mqry.SAMPLE_MANUSCRIPT)
             assert mqry.is_valid_state(new_state)
 
 
 def test_specific_state_transitions():
     """Test specific known state transitions."""
-    new_state = mqry.handle_action(mqry.SUBMITTED, mqry.ASSIGN_REF, mqry.SAMPLE_MANUSCRIPT)
+    new_state = mqry.handle_action(
+        mqry.SUBMITTED, mqry.ASSIGN_REF,
+        mqry.SAMPLE_MANUSCRIPT, ref='test@nyu.edu')
     assert new_state == mqry.IN_REF_REV
 
-    new_state = mqry.handle_action(mqry.SUBMITTED, mqry.REJECT, mqry.SAMPLE_MANUSCRIPT)
+    new_state = mqry.handle_action(
+        mqry.SUBMITTED, mqry.REJECT, mqry.SAMPLE_MANUSCRIPT)
     assert new_state == mqry.REJECTED
 
 
@@ -115,11 +120,12 @@ def test_valid_actions_by_state():
     assert len(rejected_actions) == 1  # Only WITHDRAW should be valid.
 
 
-
 def test_manuscript_immutability():
     """Test that state transitions don't modify the manuscript."""
     original_manu = mqry.SAMPLE_MANUSCRIPT.copy()
-    mqry.handle_action(mqry.SUBMITTED, mqry.ASSIGN_REF, mqry.SAMPLE_MANUSCRIPT)
+    mqry.handle_action(
+        mqry.SUBMITTED, mqry.ASSIGN_REF,
+        mqry.SAMPLE_MANUSCRIPT, ref='test@nyu.edu')
     assert mqry.SAMPLE_MANUSCRIPT == original_manu
 
 
@@ -135,5 +141,7 @@ def sample_manuscript():
 
 def test_transitions_with_different_manuscripts(sample_manuscript):
     """Test that transitions work with different manuscript data."""
-    new_state = mqry.handle_action(mqry.SUBMITTED, mqry.ASSIGN_REF, sample_manuscript)
+    new_state = mqry.handle_action(
+        mqry.SUBMITTED, mqry.ASSIGN_REF,
+        sample_manuscript, ref='test@nyu.edu')
     assert new_state == mqry.IN_REF_REV

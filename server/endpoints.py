@@ -398,15 +398,16 @@ class ReceiveAction(Resource):
             manu_id = data.get(manu.MANU_ID)
             print(manu_id)
             curr_state = data.get(manu.CURR_STATE)
+            print(curr_state)
             action = data.get(manu.ACTION)
 
             # Build kwargs based on the action
             kwargs = {}
             if action in ['ARF', 'DRF']:  # Referee-related actions
-                referee = data.get('referee')
-                if not referee:
+                ref = data.get('referee')
+                if not ref:
                     raise ValueError("Referee email required for referee")
-                kwargs['referee'] = referee
+                kwargs['ref'] = ref
                 # Include referee data if provided
                 if data.get('referee_data'):
                     kwargs['extra'] = data['referee_data']

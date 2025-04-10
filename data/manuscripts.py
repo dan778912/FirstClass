@@ -151,11 +151,6 @@ def delete_ref(manu: dict, referee: str) -> str:
 FUNC = 'f'
 
 
-# def get_valid_actions_by_state(state: str):
-#     valid_actions = query.STATE_TABLE[state].keys()
-#     return valid_actions
-
-
 def handle_action(manu_id, curr_state, action, **kwargs) -> str:
     """
     Handle an action on a manuscript.
