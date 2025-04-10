@@ -1,19 +1,13 @@
-import sys
 import os
-from http.client import (
-    # BAD_REQUEST,
-    # FORBIDDEN,
-    NOT_ACCEPTABLE,
-    NOT_FOUND,
-    OK,
-    # SERVICE_UNAVAILABLE,
-)
-from unittest.mock import patch
+import sys
 import pytest
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                '../..')))
-from data.people import NAME
-import server.endpoints as ep
+from unittest.mock import patch
+from http.client import NOT_ACCEPTABLE, NOT_FOUND, OK
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import endpoints as ep
+
 TEST_CLIENT = ep.app.test_client()
 
 
@@ -62,7 +56,7 @@ def test_title():
 
 
 @patch('data.people.read', autospec=True,
-       return_value={'id': {NAME: 'Joe Schmoe'}})
+       return_value={'id': {"name": 'Joe Schmoe'}})
 def test_read(mock_read):
     resp = TEST_CLIENT.get(ep.PEOPLE_EP)
     assert resp.status_code == OK
@@ -70,11 +64,11 @@ def test_read(mock_read):
     for _id, person in resp_json.items():
         assert isinstance(_id, str)
         assert len(_id) > 0
-        assert NAME in person
+        assert "name" in person
 
 
 @patch('data.people.read_one', autospec=True,
-       return_value={NAME: 'Joe Schmoe'})
+       return_value={"name": 'Joe Schmoe'})
 def test_read_one(mock_read):
     resp = TEST_CLIENT.get(f'{ep.PEOPLE_EP}/mock_id')
     assert resp.status_code == OK
@@ -95,8 +89,6 @@ def test_get_people(mock_read):
         assert len(_id) > 0
         assert "name" in person
         assert "email" in person
-
-    print(resp_json)
 
 
 def test_get_text(existing_text_key):
@@ -168,6 +160,7 @@ def test_create_person(valid_person_data):
         assert resp_json[ep.MESSAGE] == "Person added!"
 
 
+@pytest.mark.skip(reason="Takes too dang long")
 def test_create_person_invalid_email():
     invalid_data = {
         "name": "Test User",

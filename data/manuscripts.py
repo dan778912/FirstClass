@@ -65,15 +65,26 @@ def create_manuscript(title: str, author: str) -> str:
         return id
 
 
-def get_manuscript(manu_id: str) -> dict:
+def read_one(manu_id: str) -> dict:
+    # gotta fix this
+    return dbc.read_one(MANU_COLLECT, {MANU_ID: manu_id})
+
+
+def get_manuscript(author: str) -> dict:
     """
-    Retrieves a manuscript from the database.
+    Retrieves a manuscript from the database based on author.
     Args:
         manu_id: str - ID of the manuscript to retrieve
     Returns:
         dict: The manuscript document, or None if not found
     """
-    return dbc.read_one(MANU_COLLECT, {MANU_ID: manu_id})
+    author_manu = []
+    manu_list = read()
+    for manu in manu_list:
+        if manu[AUTHOR] == author:
+            author_manu.append(manu)
+    return author_manu
+    # return dbc.read_one(MANU_COLLECT, {MANU_ID: manu_id})
 
 
 def read() -> dict:

@@ -283,6 +283,57 @@ class PersonUpdate(Resource):
             raise wz.NotAcceptable(f'Could not update person: {err=}')
 
 
+AUTH_FLDS = api.model('AuthenticateUser', {
+    ppl.EMAIL: fields.String(required=True),
+    ppl.PASSWORD: fields.String(required=True)
+})
+
+
+@api.route(f'{PEOPLE_EP}/name/<email>')
+class PersonName(Resource):
+    def get(self, email):
+        return {ppl.NAME: ppl.read_name(email)}
+
+
+@api.route(f'{PEOPLE_EP}/login')
+class PersonLogin(Resource):
+    """
+    This class handles user authentication.
+    """
+    @api.response(HTTPStatus.OK, 'Success.')
+    @api.response(HTTPStatus.UNAUTHORIZED, 'Invalid credentials.')
+    @api.expect(AUTH_FLDS)
+    def post(self):
+        """
+        Authenticate a user with email and password.
+        """
+        data = request.json
+        try:
+            email = data.get(ppl.EMAIL)
+            password = data.get(ppl.PASSWORD)
+
+            if not email or not password:
+                raise ValueError("Email and password are required")
+
+            person = ppl.authenticate(email, password)
+            if person:
+                return {
+                    MESSAGE: 'Authentication successful',
+                    RETURN: {
+                        'email': person[ppl.EMAIL],
+                        'name': person[ppl.NAME],
+                        'roles': person[ppl.ROLES]
+                    }
+                }
+            else:
+                raise wz.Unauthorized('Invalid email or password')
+
+        except Exception as err:
+            if isinstance(err, wz.Unauthorized):
+                raise
+            raise wz.NotAcceptable(f'Authentication failed: {err=}')
+
+
 MASTHEAD = 'Masthead'
 
 
@@ -321,6 +372,13 @@ class GetManuscripts(Resource):
     def get(self):
         """fetch the manuscripts"""
         return manu.read()
+
+
+@api.route(f'{MANU_EP}/<author>')
+class GetManuscriptsByAuthor(Resource):
+    """fetch manuscripts by author"""
+    def get(self, author):
+        return manu.get_manuscript(author)
 
 
 @api.route(f'{MANU_EP}/receive_action')
@@ -413,48 +471,3 @@ class ManuscriptStateTransitions(Resource):
         for state in query.VALID_STATES:
             transitions[state] = list(query.get_valid_actions_by_state(state))
         return transitions
-
-
-AUTH_FLDS = api.model('AuthenticateUser', {
-    ppl.EMAIL: fields.String(required=True),
-    ppl.PASSWORD: fields.String(required=True)
-})
-
-
-@api.route(f'{PEOPLE_EP}/login')
-class PersonLogin(Resource):
-    """
-    This class handles user authentication.
-    """
-    @api.response(HTTPStatus.OK, 'Success.')
-    @api.response(HTTPStatus.UNAUTHORIZED, 'Invalid credentials.')
-    @api.expect(AUTH_FLDS)
-    def post(self):
-        """
-        Authenticate a user with email and password.
-        """
-        data = request.json
-        try:
-            email = data.get(ppl.EMAIL)
-            password = data.get(ppl.PASSWORD)
-
-            if not email or not password:
-                raise ValueError("Email and password are required")
-
-            person = ppl.authenticate(email, password)
-            if person:
-                return {
-                    MESSAGE: 'Authentication successful',
-                    RETURN: {
-                        'email': person[ppl.EMAIL],
-                        'name': person[ppl.NAME],
-                        'roles': person[ppl.ROLES]
-                    }
-                }
-            else:
-                raise wz.Unauthorized('Invalid email or password')
-
-        except Exception as err:
-            if isinstance(err, wz.Unauthorized):
-                raise
-            raise wz.NotAcceptable(f'Authentication failed: {err=}')

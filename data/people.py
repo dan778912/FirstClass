@@ -7,7 +7,6 @@ from data.roles import PERSON_ROLES
 import data.db_connect as dbc
 
 client = dbc.connect_db()
-print(f'{client=}')
 
 PEOPLE_COLLECT = 'people'
 MIN_USER_NAME_LEN = 2
@@ -156,6 +155,21 @@ def read() -> dict:
     people = dbc.read_dict(PEOPLE_COLLECT, EMAIL)
     print(f'{people=}')
     return people
+
+
+def read_name(email: str) -> str:
+    """Just an easy function to swap out email for name:
+    Args:
+        person (str): email of the person
+    Returns:
+        str: name of the person
+        None: if person does not exist
+    """
+    person = read_one(email)
+    if not person:
+        return None
+    else:
+        return person[NAME]
 
 
 def read_one(email: str) -> dict:

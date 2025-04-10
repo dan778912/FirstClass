@@ -124,7 +124,8 @@ def read_feature(feature_name: str) -> dict:
         return security_recs[feature_name]
     else:
         return None
-    
+
+
 @needs_recs
 def is_permitted(feature_name: str, action: str,
                  user_id: str, **kwargs) -> bool:
