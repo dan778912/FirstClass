@@ -487,5 +487,8 @@ class DevInfo(Resource):
             "python_version": sys.version,
             "cwd": os.getcwd(),
             "env": dict(os.environ) if app.debug else "Hidden in production",
-            "routes": sorted(rule.rule for rule in api.app.url_map.iter_rules())
+            "routes": sorted(
+                rule.rule for rule in api.app.url_map.iter_rules()
+            )
+
         }
