@@ -473,3 +473,19 @@ class ManuscriptStateTransitions(Resource):
         for state in query.VALID_STATES:
             transitions[state] = list(query.get_valid_actions_by_state(state))
         return transitions
+
+
+@api.route('/dev/info')
+class DevInfo(Resource):
+    """
+    Developer endpoint to show environment and runtime debug info.
+    Should NOT be exposed in production.
+    """
+    def get(self):
+        return {
+            "server_time": datetime.utcnow().isoformat() + "Z",
+            "python_version": sys.version,
+            "cwd": os.getcwd(),
+            "env": dict(os.environ) if app.debug else "Hidden in production",
+            "routes": sorted(rule.rule for rule in api.app.url_map.iter_rules())
+        }
