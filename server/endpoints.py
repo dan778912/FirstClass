@@ -12,6 +12,7 @@ import data.manus.query as query
 import data.roles as rls
 import sys
 import os
+import subprocess
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -492,3 +493,26 @@ class DevInfo(Resource):
             )
 
         }
+
+
+# Helper function to decode the subprocess output
+def format_output(result):
+    return result.stdout.decode('utf-8').strip()
+
+
+@api.route('/logtail')
+class LogTail(Resource):
+    """
+    This endpoint returns the tail of the specified log.
+    """
+    def get(self):
+        ELOG_LOC = '/var/log/system.log'
+
+        # Execute the tail command on ELOG_LOC
+        result = subprocess.run(
+            f'tail {ELOG_LOC}',
+            shell=True,
+            stdout=subprocess.PIPE
+        )
+
+        return {"log": format_output(result)}
