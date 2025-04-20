@@ -170,6 +170,15 @@ class Text(Resource):
                                    f'{err=}')
 
 
+PEOPLE_CREATE_FLDS = api.model('AddNewPeopleEntry', {
+    ppl.NAME: fields.String,
+    ppl.EMAIL: fields.String,
+    ppl.AFFILIATION: fields.String,
+    ppl.ROLE: fields.String,
+    ppl.PASSWORD: fields.String(required=True)  # Password now required
+})
+
+
 @api.route(PEOPLE_EP)
 class People(Resource):
     """
@@ -208,14 +217,28 @@ class Person(Resource):
         else:
             raise wz.NotFound(f'No such person: {_id}')
 
-
-PEOPLE_CREATE_FLDS = api.model('AddNewPeopleEntry', {
-    ppl.NAME: fields.String,
-    ppl.EMAIL: fields.String,
-    ppl.AFFILIATION: fields.String,
-    ppl.ROLE: fields.String,
-    ppl.PASSWORD: fields.String(required=True)  # Password now required
-})
+    @api.response(HTTPStatus.OK, 'Success.')
+    @api.response(HTTPStatus.NOT_ACCEPTABLE, 'Not acceptable.')
+    @api.expect(PEOPLE_CREATE_FLDS)
+    def put(self, _id):
+        data = request.json
+        try:
+            name = data.get('name')
+            affiliation = data.get('affiliation')
+            new_email = data.get('email')
+            roles = data.get('roles', [])
+            if not roles:
+                # For backward compatibility
+                role = data.get('role')
+                roles = [role] if role else []
+            email = new_email if new_email else _id
+            ret = ppl.update(_id, name, affiliation, email, roles)
+            return {
+                MESSAGE: 'Person updated!',
+                RETURN: ret
+            }
+        except Exception as err:
+            raise wz.NotAcceptable(f'Could not update person: {err=}')
 
 
 @api.route(f'{PEOPLE_EP}/create')
@@ -227,7 +250,7 @@ class PersonCreate(Resource):
     @api.response(HTTPStatus.OK, 'Success.')
     @api.response(HTTPStatus.NOT_ACCEPTABLE, 'Not acceptable.')
     @api.expect(PEOPLE_CREATE_FLDS)
-    def put(self):
+    def post(self):
         """
         Add a person, return the added person.
         """
@@ -256,32 +279,6 @@ class PersonCreate(Resource):
         except Exception as err:
             raise wz.NotAcceptable(f'Could not add person: '
                                    f'{err=}')
-
-
-@api.route(f'{PEOPLE_EP}/update/<current_email>')
-class PersonUpdate(Resource):
-    @api.response(HTTPStatus.OK, 'Success.')
-    @api.response(HTTPStatus.NOT_ACCEPTABLE, 'Not acceptable.')
-    @api.expect(PEOPLE_CREATE_FLDS)
-    def put(self, current_email):
-        data = request.json
-        try:
-            name = data.get('name')
-            affiliation = data.get('affiliation')
-            new_email = data.get('email')
-            roles = data.get('roles', [])
-            if not roles:
-                # For backward compatibility
-                role = data.get('role')
-                roles = [role] if role else []
-            email = new_email if new_email else current_email
-            ret = ppl.update(current_email, name, affiliation, email, roles)
-            return {
-                MESSAGE: 'Person updated!',
-                RETURN: ret
-            }
-        except Exception as err:
-            raise wz.NotAcceptable(f'Could not update person: {err=}')
 
 
 AUTH_FLDS = api.model('AuthenticateUser', {

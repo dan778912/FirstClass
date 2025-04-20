@@ -1,3 +1,4 @@
+import data.db_connect as dbc
 """
 This module interfaces to our user data.
 """
@@ -7,25 +8,7 @@ KEY = 'key'
 TITLE = 'title'
 TEXT = 'text'
 EMAIL = 'email'
-
-TEST_KEY = 'HomePage'
-SUBM_KEY = 'SubmissionPage'
-DEL_KEY = 'DeletePage'
-
-text_dict = {
-    TEST_KEY: {
-        TITLE: 'Home Page',
-        TEXT: 'This is a journal about building API servers.',
-    },
-    SUBM_KEY: {
-        TITLE: 'Submissions Page',
-        TEXT: 'All submissions must be original work in Word format.',
-    },
-    DEL_KEY: {
-        TITLE: 'Delete Page',
-        TEXT: 'This is a text to delete.',
-    },
-}
+TEXT_COLLECT = "text"
 
 
 def read():
@@ -35,7 +18,9 @@ def read():
         - Returns a dictionary of users keyed on user email.
         - Each user email must be the key for another dictionary.
     """
-    return text_dict
+    text = dbc.read_dict(TEXT_COLLECT, KEY)
+    print(f'{text=}')
+    return text
 
 
 def create(key: str, title: str, text: str) -> bool:
@@ -44,10 +29,19 @@ def create(key: str, title: str, text: str) -> bool:
         - takes key, title, text (all str)
         - returns True if created successfully, False otherwise
     """
-    if key in text_dict:
-        return False  # Key already exists, creation failed
-    text_dict[key] = {TITLE: title, TEXT: text}
-    return True
+    # check if dict exists
+    existing = read_one(key)
+    if existing:
+        return key
+    txt = {
+        KEY: key,
+        TITLE: title,
+        TEXT: text
+    }
+    if dbc.create(TEXT_COLLECT, txt):
+        return key
+    else:
+        return None
 
 
 def delete(key: str) -> bool:
@@ -56,10 +50,10 @@ def delete(key: str) -> bool:
         - Text to delete (str)
         - returns True if deleted successfully, False otherwise
     """
-    if key in text_dict:
-        del text_dict[key]
-        return True
-    return False  # Key not found
+    if not read_one(key):
+        return False
+    print(f'{KEY=}, {key=}')
+    return dbc.delete(TEXT_COLLECT, {KEY: key})
 
 
 def update(key: str, title: str = None, text: str = None) -> bool:
@@ -70,13 +64,21 @@ def update(key: str, title: str = None, text: str = None) -> bool:
             text to update (optional)
         -   returns True if updated successfully, False otherwise
     """
-    if key not in text_dict:
-        return False  # Key not found
-    if title:
-        text_dict[key][TITLE] = title
-    if text:
-        text_dict[key][TEXT] = text
-    return True
+    if read_one(key) is None:
+        raise ValueError(
+            f'Trying to update person that does not exist: '
+            f'{key=}'
+        )
+    update_data = {
+        KEY: key,
+        TITLE: title,
+        TEXT: text
+    }
+    ret = dbc.update(TEXT_COLLECT,
+                     {KEY: key},
+                     update_data)
+    print(f'Update result: {ret=}')
+    return key
 
 
 def read_one(key: str) -> dict:
@@ -88,15 +90,4 @@ def read_one(key: str) -> dict:
         dict: The page dictionary corresponding to the key.
               If the key is not found, returns an empty dictionary.
     """
-    result = {}
-    if key in text_dict:
-        result = text_dict[key]
-    return result
-
-
-def main():
-    print(read())
-
-
-if __name__ == '__main__':
-    main()
+    return dbc.read_one(TEXT_COLLECT, {KEY: key})
