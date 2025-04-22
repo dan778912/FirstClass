@@ -34,8 +34,6 @@ def is_valid_email(email: str) -> bool:
 
 
 def is_valid_person(
-    name: str,
-    affiliation: str,
     email: str,
     role: str = None,
     roles: list = None
@@ -94,14 +92,12 @@ def create(name: str, affiliation: str, email: str, roles: list,
     if not is_manu_author and not password:
         raise ValueError("Password is required for non-manuscript users")
 
-    if is_valid_person(name, affiliation, email, roles=roles):
+    if is_valid_person(email, roles=roles):
         person = {
             NAME: name,
             AFFILIATION: affiliation,
             EMAIL: email,
-            ROLES: roles,
-            MANUSCRIPTS: [],
-            SUBMISSION_COUNT: 0
+            ROLES: roles
         }
         if password:
             person[PASSWORD] = generate_password_hash(password)
@@ -128,19 +124,16 @@ def update(curr_email: str, name: str, affil: str, email: str, roles: list):
             f'Trying to update person that does not exist: '
             f'{curr_email=}'
         )
-    print(f'Updating person {curr_email} with roles: {roles}')
-    if is_valid_person(name, affil, curr_email, roles=roles):
+    if is_valid_person(curr_email, roles=roles):
         update_data = {
             NAME: name,
             AFFILIATION: affil,
             EMAIL: email,
             ROLES: roles
         }
-        print(f'Update data: {update_data}')
-        ret = dbc.update(PEOPLE_COLLECT,
-                         {EMAIL: curr_email},
-                         update_data)
-        print(f'Update result: {ret=}')
+        dbc.update(PEOPLE_COLLECT,
+                   {EMAIL: curr_email},
+                   update_data)
         return email
 
 
@@ -153,7 +146,6 @@ def read() -> dict:
         dict: dictionary of users keyed by email
     """
     people = dbc.read_dict(PEOPLE_COLLECT, EMAIL)
-    print(f'{people=}')
     return people
 
 
@@ -211,6 +203,20 @@ def authenticate(email: str, password: str) -> dict:
     if check_password_hash(person[PASSWORD], password):
         return person
     return None
+
+
+def get_referees() -> list:
+    """
+    Get a list of referees from the database.
+    Returns:
+        list: List of referee emails
+    """
+    referees = []
+    people = dbc.read_dict(PEOPLE_COLLECT, EMAIL)
+    for person in people.values():
+        if has_role(person, 'RE'):
+            referees.append(person[EMAIL])
+    return referees
 
 
 def add_manuscript(email: str, manuscript_id: str) -> bool:
