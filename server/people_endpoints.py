@@ -10,7 +10,7 @@ api = Namespace('people', description='People operations')
 MESSAGE = 'Message'
 RETURN = 'Return'
 PEOPLE_EP = '/people'
-REF_EP = '/referees'
+REF_EP = '/people/referees'
 
 
 PEOPLE_CREATE_FLDS = api.model('AddNewPeopleEntry', {
@@ -35,7 +35,7 @@ class People(Resource):
         return ppl.read()
 
 
-@api.route(REF_EP)
+@api.route('/referees')
 class Referees(Resource):
     """
     Get a list of referees from the database.
