@@ -6,6 +6,7 @@ import data.roles as rls
 import sys
 import os
 import subprocess
+from collections import deque
 
 # Import the endpoints from separate modules
 from server.text_endpoints import api as text_api
@@ -137,3 +138,26 @@ class LogTail(Resource):
         )
 
         return {"log": format_output(result)}
+
+
+@api.route('/security/logs')
+class SecurityLogs(Resource):
+    """
+    Return the last N lines of the security.log file.
+    """
+    def get(self):
+        # replace with your path, if different
+        log_path = 'security.log'
+        log_path = 'security.log'
+        try:
+            with open(log_path, 'r', encoding='utf-8') as f:
+                # pull in only the last 100 lines
+                lines = deque(f, maxlen=100)
+                lines = deque(f, maxlen=100)
+        except FileNotFoundError:
+            lines = []
+
+        # strip trailing newlines
+        return {
+            'logs': [line.rstrip('\n') for line in lines]
+        }

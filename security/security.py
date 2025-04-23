@@ -1,4 +1,8 @@
 from functools import wraps
+import logging
+import json
+from logging.handlers import RotatingFileHandler
+from functools import wraps
 
 # import data.db_connect as dbc
 
@@ -47,6 +51,22 @@ Our record format to meet our requirements (see security.md) will be:
     feature_name2: # etc.
 }
 """
+
+
+# set up a dedicated security logger that writes to security.log
+logger = logging.getLogger('security')
+logger.setLevel(logging.INFO)
+
+# rotate after 5 MB, keep 2 backups
+handler = RotatingFileHandler('security.log',
+                              maxBytes=5*1024*1024,
+                              backupCount=2,
+                              encoding='utf-8')
+handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(message)s'
+))
+logger.addHandler(handler)
+
 
 COLLECT_NAME = 'security'
 CREATE = 'create'
@@ -129,19 +149,33 @@ def read_feature(feature_name: str) -> dict:
 @needs_recs
 def is_permitted(feature_name: str, action: str,
                  user_id: str, **kwargs) -> bool:
-    prot = read_feature(feature_name)
-    if prot is None:
-        return True
-    if action not in prot:
-        return True
-    if USER_LIST in prot[action]:
-        if user_id not in prot[action][USER_LIST]:
-            return False
-    if CHECKS not in prot[action]:
-        return True
-    for check in prot[action][CHECKS]:
-        if check not in CHECK_FUNCS:
-            raise ValueError(f'Bad check passed to is_permitted: {check}')
-        if not CHECK_FUNCS[check](user_id, **kwargs):
-            return False
-    return True
+
+    prot = read_feature(feature_name) or {}
+    action_cfg = prot.get(action)
+
+    # default-deny if no config exists
+    if action_cfg is None:
+        allowed = False
+    else:
+        # user_list check
+        ul = action_cfg.get(USER_LIST, [])
+        if ul and user_id not in ul:
+            allowed = False
+        else:
+            # run all checks
+            allowed = True
+            for ck, param in action_cfg.get(CHECKS, {}).items():
+                if ck not in CHECK_FUNCS or not CHECK_FUNCS[ck](user_id, **{ck: param, **kwargs}):
+                    allowed = False
+                    break
+
+    # **LOG IT** before returning
+    logger.info(json.dumps({
+        'feature': feature_name,
+        'action':   action,
+        'user':     user_id,
+        'allowed':  allowed,
+        'params':   kwargs
+    }))
+
+    return allowed
