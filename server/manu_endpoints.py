@@ -138,3 +138,29 @@ class ManuscriptStateTransitions(Resource):
         for state in query.VALID_STATES:
             transitions[state] = list(query.get_valid_actions_by_state(state))
         return transitions
+
+
+@api.route('/state_names')
+class ManuscriptStateNames(Resource):
+    def get(self):
+        """Return a mapping of state codes to their human-readable names."""
+        # Map state and action codes to human-readable names
+        state_names = {
+            # States
+            query.SUBMITTED: 'Submitted',
+            query.AUTHOR_REVIEW: 'Author Review',
+            query.COPY_EDIT: 'Copy Editing',
+            query.EDITOR_REVIEW: 'Editor Review',
+            query.FORMATTING: 'Formatting',
+            query.IN_REF_REV: 'In Referee Review',
+            query.PUBLISHED: 'Published',
+            query.REJECTED: 'Rejected',
+            query.WITHDRAWN: 'Withdrawn',
+            # Actions
+            query.ASSIGN_REF: 'Assign Referee',
+            query.DELETE_REF: 'Delete Referee',
+            query.ACCEPT: 'Accept',
+            query.DONE: 'Done',
+            query.EDITOR_MOVE: 'Editor Move',
+        }
+        return state_names
