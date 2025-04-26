@@ -40,11 +40,3 @@ def get_mh_fields(journal_code=None) -> list:
     - returns masthead fields in form of list
     """
     return MH_FIELDS
-
-
-def main():
-    print(get_masthead())
-
-
-if __name__ == '__main__':
-    main()

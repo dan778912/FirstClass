@@ -175,3 +175,55 @@ def handle_action(manu_id, curr_state, action, **kwargs) -> str:
     }
     update_manuscript(manu_id, updates)
     return new_state
+
+
+def sort_manuscripts_by_state() -> list:
+    """
+    Sorts manuscripts based on their state in the manuscript lifecycle.
+
+    Returns:
+        list: A list of manuscript dictionaries sorted by state order
+    """
+
+    # Use the order of states from query.py
+    order = query.VALID_STATES
+
+    # Get all manuscripts
+    manuscripts = read()
+
+    # Define a helper function to get the state order index
+    def get_state_order_index(manuscript):
+        # Get the current state of the manuscript
+        state = manuscript[CURR_STATE]
+        # If it's a valid state, return its index in the order list
+        if state in order:
+            return order.index(state)
+        # If it's an invalid state, put it at the end
+        return len(order)
+
+    # Sort the manuscripts based on the order
+    sorted_manuscripts = sorted(manuscripts, key=get_state_order_index)
+
+    return sorted_manuscripts
+
+
+def filter_manuscripts_by_state(state: str) -> list:
+    """
+    Filters manuscripts to only those in a specific state.
+
+    Args:
+        state: The state to filter by (must be a valid state from query.py)
+
+    Returns:
+        list: A list of manuscript dictionaries in the specified state
+    """
+    if state not in query.VALID_STATES:
+        raise ValueError(f"Valid states: {query.VALID_STATES}")
+
+    # Get all manuscripts
+    manuscripts = read()
+
+    # Filter to only those in the specified state
+    filtered_manuscripts = [m for m in manuscripts if m[CURR_STATE] == state]
+
+    return filtered_manuscripts

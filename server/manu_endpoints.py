@@ -3,6 +3,7 @@ from flask import request
 from flask_restx import Resource, Namespace, fields
 import data.manuscripts as manu
 import data.manus.query as query
+import data.db_connect as dbc
 import werkzeug.exceptions as wz
 
 # Create a namespace instead of a Flask app
@@ -164,3 +165,37 @@ class ManuscriptStateNames(Resource):
             query.EDITOR_MOVE: 'Editor Move',
         }
         return state_names
+
+
+@api.route('/sorted')
+class ManuscriptSorted(Resource):
+    def get(self):
+        """Return all manuscripts sorted by their state in the workflow."""
+        sorted_manuscripts = manu.sort_manuscripts_by_state()
+
+        # Convert MongoDB ObjectIDs to strings for JSON serialization
+        for manuscript in sorted_manuscripts:
+            dbc.convert_mongo_id(manuscript)
+
+        return sorted_manuscripts
+
+
+@api.route('/state/<string:state>')
+class ManuscriptsByState(Resource):
+    def get(self, state):
+        """Return manuscripts filtered by a specific state.
+        Args:
+            state: The state code to filter by (e.g., 'SUB', 'PUB')
+        Returns:
+            List of manuscripts in the specified state
+        """
+        try:
+            filtered_manuscripts = manu.filter_manuscripts_by_state(state)
+
+            # Convert MongoDB ObjectIDs to strings for JSON serialization
+            for manuscript in filtered_manuscripts:
+                dbc.convert_mongo_id(manuscript)
+
+            return filtered_manuscripts
+        except ValueError as e:
+            return {'error': str(e)}, 400
