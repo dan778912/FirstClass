@@ -44,6 +44,13 @@ class GetManuscripts(Resource):
 class GetManuscriptsByAuthor(Resource):
     """fetch manuscripts by author"""
     def get(self, author):
+        """
+        Fetch manuscripts by author.
+        Args:
+            author: str - Email of the author
+        Returns:
+            list: List of manuscripts by the author
+        """
         return manu.get_manuscript(author)
 
 
@@ -94,9 +101,15 @@ MANU_CREATE_FLDS = api.model('CreateManuscript', {
 
 @api.route('/delete/<string:_id>')
 class DeleteManuscript(Resource):
+    """
+    Delete a manuscript by ID.
+    """
     @api.response(HTTPStatus.OK, 'Success.')
     @api.response(HTTPStatus.NOT_FOUND, 'No such manuscript.')
     def delete(self, _id):
+        """
+        Delete a manuscript by ID.
+        """
         ret = manu.delete_manuscript(_id)
         if ret != 0:
             return {'Deleted': ret}
@@ -135,6 +148,9 @@ class CreateManuscript(Resource):
 @api.route('/state_transitions')
 class ManuscriptStateTransitions(Resource):
     def get(self):
+        """
+        Return a mapping of state codes to valid actions.
+        """
         transitions = {}
         for state in query.VALID_STATES:
             transitions[state] = list(query.get_valid_actions_by_state(state))
@@ -165,6 +181,32 @@ class ManuscriptStateNames(Resource):
             query.EDITOR_MOVE: 'Editor Move',
         }
         return state_names
+
+
+@api.route('/valid_states')
+class ManuscriptValidStates(Resource):
+    def get(self):
+        """Return valid states with their display names
+
+        Returns:
+            list: List of dictionaries with state codes and names
+        """
+        state_names = {
+            query.SUBMITTED: 'Submitted',
+            query.EDITOR_REVIEW: 'Editor Review',
+            query.FORMATTING: 'Formatting',
+            query.IN_REF_REV: 'In Referee Review',
+            query.PUBLISHED: 'Published',
+            query.REJECTED: 'Rejected',
+            query.WITHDRAWN: 'Withdrawn',
+            query.COPY_EDIT: 'Copy Editing',
+            query.AUTHOR_REVIEW: 'Author Review',
+        }
+        # Return a list of objects with code and name for each state
+        valid_states = []
+        for s in query.VALID_STATES:
+            valid_states.append({'code': s, 'name': state_names.get(s, s)})
+        return valid_states
 
 
 @api.route('/sorted')

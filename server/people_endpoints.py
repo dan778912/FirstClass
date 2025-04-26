@@ -43,6 +43,11 @@ class Referees(Resource):
         list: List of referee emails
     """
     def get(self):
+        """
+        Get a list of referees from the database.
+        Returns:
+            list: List of referee emails
+        """
         return ppl.get_referees()
 
 
@@ -65,6 +70,9 @@ class Person(Resource):
     @api.response(HTTPStatus.OK, 'Success.')
     @api.response(HTTPStatus.NOT_FOUND, 'No such person.')
     def delete(self, _id):
+        """
+        Delete a person by ID.
+        """
         ret = ppl.delete(_id)
         if ret != 0:
             return {'Deleted': ret}
@@ -75,6 +83,9 @@ class Person(Resource):
     @api.response(HTTPStatus.NOT_ACCEPTABLE, 'Not acceptable.')
     @api.expect(PEOPLE_CREATE_FLDS)
     def put(self, _id):
+        '''
+        Update a person by ID.
+        '''
         data = request.json
         try:
             name = data.get('name')
@@ -144,6 +155,13 @@ AUTH_FLDS = api.model('AuthenticateUser', {
 @api.route('/name/<email>')
 class PersonName(Resource):
     def get(self, email):
+        """
+        Get a person's name by email.
+        Args:
+            email: str - Email of the person
+        Returns:
+            dict: Dictionary containing the person's name
+        """
         return {ppl.NAME: ppl.read_name(email)}
 
 
@@ -195,4 +213,9 @@ class Masthead(Resource):
     Get a journal's masthead.
     """
     def get(self):
+        """
+        Get a journal's masthead.
+        Returns:
+            dict: Dictionary containing the journal's masthead
+        """
         return {MASTHEAD: mh.get_masthead()}
