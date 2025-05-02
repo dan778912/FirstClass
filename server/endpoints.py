@@ -127,7 +127,6 @@ class AccessLog(Resource):
     Return the tail of the PythonAnywhere access log.
     """
     def get(self):
-        # <-- Point at /var/log, not under your home dir
         user = os.environ['USER']
         log_path = f'/var/log/{user}.pythonanywhere.com.access.log'
 
@@ -139,7 +138,27 @@ class AccessLog(Resource):
         # Grab the last 20 lines
         cmd = f'tail -n 20 {log_path}'
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE)
-        return {'access_log': format_output(result)}
+        return {'access log': format_output(result)}
+
+
+@api.route('/errorlog')
+class ErrorLog(Resource):
+    """
+    Return the tail of the PythonAnywhere error log.
+    """
+    def get(self):
+        user = os.environ['USER']
+        log_path = f'/var/log/{user}.pythonanywhere.com.error.log'
+
+        if not os.path.isfile(log_path):
+            return {
+                'error': f'Log file not found at {log_path}'
+            }, 404
+
+        # Grab the last 20 lines
+        cmd = f'tail -n 20 {log_path}'
+        result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE)
+        return {'error log': format_output(result)}
 
 
 @api.route('/security/logs')
