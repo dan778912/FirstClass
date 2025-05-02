@@ -117,27 +117,31 @@ class DevInfo(Resource):
         }
 
 
-# Helper function to decode the subprocess output
 def format_output(result):
     return result.stdout.decode('utf-8').strip()
 
 
-@api.route('/logtail')
-class LogTail(Resource):
+@api.route('/accesslog')
+class AccessLog(Resource):
     """
-    This endpoint returns the tail of the specified log.
+    Return the tail of the PythonAnywhere access log.
     """
     def get(self):
-        ELOG_LOC = '/var/log/system.log'
-
-        # Execute the tail command on ELOG_LOC
-        result = subprocess.run(
-            f'tail {ELOG_LOC}',
-            shell=True,
-            stdout=subprocess.PIPE
+        # Build the path under your home directory
+        home = os.environ['HOME']
+        log_path = os.path.join(
+            home, 'var', 'log',
+            'zcd.pythonanywhere.com.access.log'
         )
 
-        return {"log": format_output(result)}
+        # If you’re feeling cautious, check it exists
+        if not os.path.isfile(log_path):
+            return {'error': f'Log file not found at {log_path}'}, 404
+
+        # Run tail and return
+        cmd = f'tail -n 20 {log_path}'
+        result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE)
+        return {'access_log': format_output(result)}
 
 
 @api.route('/security/logs')
