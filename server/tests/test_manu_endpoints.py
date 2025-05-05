@@ -86,12 +86,53 @@ def test_get_manuscripts_by_author():
 def test_create_manuscript(valid_manuscript_data):
     manu_id = "new_manu_id"
 
-    with patch('data.manuscripts.create_manuscript', return_value=manu_id):
+    # Mock all the necessary functions
+    with patch('data.manuscripts.create_manuscript',
+               return_value=manu_id) as mock_create, \
+         patch('data.people.exists', return_value=False) as mock_exists:
         resp = TEST_CLIENT.put(f'{MANU_EP}/create', json=valid_manuscript_data)
         assert resp.status_code == OK
         resp_json = resp.get_json()
         assert resp_json[MESSAGE] == "Manuscript created successfully!"
         assert resp_json[RETURN] == manu_id
+
+        # Verify that create_manuscript was called with the right arguments
+        mock_create.assert_called_once_with(
+            valid_manuscript_data['title'],
+            valid_manuscript_data['author']
+        )
+
+        # Verify that exists was called with the author email
+        mock_exists.assert_called_once_with(valid_manuscript_data['author'])
+
+    # Test with an existing author who doesn't have the AU role
+    mock_person = {
+        "name": "Test User",
+        "email": valid_manuscript_data['author'],
+        "roles": ["ED"],  # Has editor role but not author
+        "affiliation": "Test University"
+    }
+
+    with patch('data.manuscripts.create_manuscript',
+               return_value=manu_id), \
+         patch('data.people.exists', return_value=True), \
+         patch('data.people.read_one', return_value=mock_person), \
+         patch('data.people.update',
+               return_value=valid_manuscript_data['author']) as mock_update:
+        resp = TEST_CLIENT.put(f'{MANU_EP}/create', json=valid_manuscript_data)
+        assert resp.status_code == OK
+        resp_json = resp.get_json()
+        assert resp_json[MESSAGE] == "Manuscript created successfully!"
+        assert resp_json[RETURN] == manu_id
+
+        # Verify that update was called to add the AU role
+        mock_update.assert_called_once_with(
+            valid_manuscript_data['author'],
+            mock_person["name"],
+            mock_person["affiliation"],
+            valid_manuscript_data['author'],
+            ["ED", "AU"]  # Should have added AU to the roles
+        )
 
 
 def test_delete_manuscript(existing_manuscript_id):

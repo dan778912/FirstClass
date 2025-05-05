@@ -4,6 +4,7 @@ from flask_restx import Resource, Namespace, fields
 import data.manuscripts as manu
 import data.manus.query as query
 import data.db_connect as dbc
+import data.people as ppl
 import werkzeug.exceptions as wz
 
 # Create a namespace instead of a Flask app
@@ -69,9 +70,7 @@ class ReceiveAction(Resource):
         try:
             data = request.json
             manu_id = data.get(manu.MANU_ID)
-            print(manu_id)
             curr_state = data.get(manu.CURR_STATE)
-            print(curr_state)
             action = data.get(manu.ACTION)
 
             # Build kwargs based on the action
@@ -137,6 +136,27 @@ class CreateManuscript(Resource):
                 raise ValueError("Title and author are required")
 
             manu_id = manu.create_manuscript(title, author)
+
+            # Check if author email exists in people collection
+            if ppl.exists(author):
+                # Get the person
+                person = ppl.read_one(author)
+
+                # Check if person already has the 'AU' role
+                if 'AU' not in person.get(ppl.ROLES, []):
+                    # Add 'AU' role to the person
+                    current_roles = person.get(ppl.ROLES, [])
+                    current_roles.append('AU')
+
+                    # Update the person with the new role
+                    ppl.update(
+                        author,
+                        person.get(ppl.NAME),
+                        person.get(ppl.AFFILIATION),
+                        author,
+                        current_roles
+                    )
+
             return {
                 MESSAGE: 'Manuscript created successfully!',
                 RETURN: manu_id,
