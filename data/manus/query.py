@@ -153,6 +153,9 @@ STATE_TABLE = {
         DONE: {
             FUNC: lambda manuscript, **kwargs: AUTHOR_REVIEW,
         },
+        WITHDRAW: {
+            FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+        },
     },
     AUTHOR_REVIEW: {
         DONE: {
@@ -166,6 +169,9 @@ STATE_TABLE = {
         DONE: {
             FUNC: lambda manuscript, **kwargs: PUBLISHED,
         },
+        WITHDRAW: {
+            FUNC: lambda manuscript, **kwargs: WITHDRAWN,
+        },
     },
     EDITOR_REVIEW: {
         ACCEPT: {
@@ -173,6 +179,9 @@ STATE_TABLE = {
         },
         REJECT: {
             FUNC: lambda manuscript, **kwargs: REJECTED,
+        },
+        WITHDRAW: {
+            FUNC: lambda manuscript, **kwargs: WITHDRAWN,
         },
     },
     REJECTED: {
