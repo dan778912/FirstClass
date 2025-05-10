@@ -80,7 +80,7 @@ def get_manuscript(author: str) -> dict:
     author_manu = []
     manu_list = read()
     for manu in manu_list:
-        if manu[AUTHOR] == author:
+        if manu.get(AUTHOR) == author:
             author_manu.append(manu)
     return author_manu
     # return dbc.read_one(MANU_COLLECT, {MANU_ID: manu_id})
@@ -135,14 +135,18 @@ def is_valid_action(action: str) -> bool:
 
 
 def assign_ref(manu: dict, referee: str, extra=None) -> str:
+    if flds.REFEREES not in manu:
+        manu[flds.REFEREES] = []
     manu[flds.REFEREES].append(referee)
     return query.IN_REF_REV
 
 
 def delete_ref(manu: dict, referee: str) -> str:
-    if len(manu[flds.REFEREES]) > 0:
-        manu[flds.REFEREES].remove(referee)
-    if len(manu[flds.REFEREES]) > 0:
+    referees = manu.get(flds.REFEREES, [])
+    if len(referees) > 0:
+        referees.remove(referee)
+        manu[flds.REFEREES] = referees
+    if len(referees) > 0:
         return query.IN_REF_REV
     else:
         return query.SUBMITTED

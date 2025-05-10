@@ -32,6 +32,14 @@ MANU_ACTION_FLDS = api.model('ManuscriptAction', {
 })
 
 
+ACTION_ASSIGN_REF = 'ARF'
+ACTION_DELETE_REF = 'DRF'
+
+
+REFEREE = 'referee'
+REFEREE_DATA = 'referee_data'
+
+
 @api.route('/')
 class GetManuscripts(Resource):
     """fetch all manuscripts"""
@@ -75,14 +83,12 @@ class ReceiveAction(Resource):
 
             # Build kwargs based on the action
             kwargs = {}
-            if action in ['ARF', 'DRF']:  # Referee-related actions
-                ref = data.get('referee')
+            if action in [ACTION_ASSIGN_REF, ACTION_DELETE_REF]:
+                ref = data.get(REFEREE)
                 if not ref:
                     raise ValueError("Referee email required for referee")
                 kwargs['ref'] = ref
-                # Include referee data if provided
-                if data.get('referee_data'):
-                    kwargs['extra'] = data['referee_data']
+                kwargs['extra'] = data.get(REFEREE_DATA)
             ret = manu.handle_action(manu_id, curr_state, action, **kwargs)
             return {
                 MESSAGE: 'Action received!',

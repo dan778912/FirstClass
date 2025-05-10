@@ -161,7 +161,7 @@ def read_name(email: str) -> str:
     if not person:
         return None
     else:
-        return person[NAME]
+        return person.get(NAME)
 
 
 def read_one(email: str) -> dict:
@@ -200,9 +200,14 @@ def authenticate(email: str, password: str) -> dict:
     if not person or not person.get(PASSWORD):
         return None
 
-    if check_password_hash(person[PASSWORD], password):
+    if check_password_hash(person.get(PASSWORD), password):
         return person
     return None
+
+
+def change_password():
+    # insert stuff here
+    pass
 
 
 def get_referees() -> list:
@@ -215,7 +220,7 @@ def get_referees() -> list:
     people = dbc.read_dict(PEOPLE_COLLECT, EMAIL)
     for person in people.values():
         if has_role(person, 'RE'):
-            referees.append(person[EMAIL])
+            referees.append(person.get(EMAIL))
     return referees
 
 

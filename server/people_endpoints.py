@@ -88,13 +88,13 @@ class Person(Resource):
         '''
         data = request.json
         try:
-            name = data.get('name')
-            affiliation = data.get('affiliation')
-            new_email = data.get('email')
-            roles = data.get('roles', [])
+            name = data.get(ppl.NAME)
+            affiliation = data.get(ppl.AFFILIATION)
+            new_email = data.get(ppl.EMAIL)
+            roles = data.get(ppl.ROLES, [])
             if not roles:
                 # For backward compatibility
-                role = data.get('role')
+                role = data.get(ppl.ROLE)
                 roles = [role] if role else []
             email = new_email if new_email else _id
             ret = ppl.update(_id, name, affiliation, email, roles)
@@ -190,9 +190,9 @@ class PersonLogin(Resource):
                 return {
                     MESSAGE: 'Authentication successful',
                     RETURN: {
-                        'email': person[ppl.EMAIL],
-                        'name': person[ppl.NAME],
-                        'roles': person[ppl.ROLES]
+                        'email': person.get(ppl.EMAIL),
+                        'name': person.get(ppl.NAME),
+                        'roles': person.get(ppl.ROLES, [])
                     }
                 }
             else:
